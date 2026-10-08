@@ -1,0 +1,100 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Python: sync",
+      "problemMatcher": [],
+      "type": "process",
+      "command": "uv",
+      "args": [
+        "sync",
+        "--locked"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "Python: lint",
+      "problemMatcher": [],
+      "type": "process",
+      "command": "${workspaceFolder}/.venv/bin/ruff",
+      "args": [
+        "check",
+        "--no-cache",
+        "src/pythonsrc"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Python: sync",
+      "dependsOrder": "sequence"
+    },
+    {
+      "label": "C++: configure",
+      "problemMatcher": [],
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--preset",
+        "debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "C++: build",
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "--preset",
+        "debug"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "C++: configure",
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "C++26: configure",
+      "problemMatcher": [],
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--preset",
+        "debug-cpp26"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
+    },
+    {
+      "label": "C++26: build",
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "type": "process",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "--preset",
+        "debug-cpp26"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "C++26: configure",
+      "dependsOrder": "sequence"
+    }
+  ]
+}

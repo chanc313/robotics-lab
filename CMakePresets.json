@@ -1,0 +1,39 @@
+{
+  "version": 5,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 24,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "debug",
+      "displayName": "Local C++ Debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/output/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "debug-cpp26",
+      "inherits": "debug",
+      "displayName": "Clang 20 / experimental C++26",
+      "binaryDir": "${sourceDir}/output/build/debug-cpp26",
+      "cacheVariables": {
+        "CMAKE_CXX_COMPILER": "/usr/bin/clang++-20",
+        "ROBOTICS_LAB_CPP26": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "configurePreset": "debug"
+    },
+    {
+      "name": "debug-cpp26",
+      "configurePreset": "debug-cpp26"
+    }
+  ]
+}

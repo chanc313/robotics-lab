@@ -1,0 +1,17 @@
+.venv/
+output/
+.ruff_cache/
+__pycache__/
+*.py[cod]
+build/
+install/
+log/
+.ipynb_checkpoints/
+data/
+models/
+datasets/
+*.log
+dist/
+*.egg-info/
+.env
+.env.*

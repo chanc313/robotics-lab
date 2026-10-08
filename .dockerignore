@@ -1,0 +1,15 @@
+.git
+.venv
+output
+build
+install
+log
+__pycache__
+.ruff_cache
+.ipynb_checkpoints
+data
+models
+datasets
+dist
+.env
+.env.*
