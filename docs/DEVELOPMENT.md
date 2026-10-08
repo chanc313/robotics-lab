@@ -8,7 +8,10 @@
 
 | 文件 | 为什么保留 | 复用到新项目时 |
 |---|---|---|
-| Dockerfile | 可选 ROS Jazzy/Gazebo 容器配方，沿用已有仓库内容，不等同于本机环境 | 根据实际容器需求调整 |
+| Dockerfile | 通用 C++/Python 开发镜像配方：系统与工具链，不装业务服务 | 根据实际容器需求调整 |
+| compose.yaml | 管理开发容器和持久卷，未来加入中间件服务 | 按需求增加服务、健康检查、卷和网络 |
+| .devcontainer/devcontainer.json | VS Code 连接 Compose 的 dev 服务并同步 Python 环境 | 按项目调整扩展和开发入口 |
+| docs/CONTAINERS.md | 容器使用和后续中间件接入说明 | 按实际架构补充 |
 | .dockerignore | 排除容器构建上下文里的虚拟环境、源码历史和产物 | 按需要调整 |
 | LICENSE | 仓库已有 MIT 许可证 | 新项目按作者要求选择许可证 |
 | README.md | 项目首页：说明用途、布局与常用命令 | 改项目名称、用途和真实运行入口 |

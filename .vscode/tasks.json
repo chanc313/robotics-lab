@@ -18,8 +18,11 @@
       "label": "Python: lint",
       "problemMatcher": [],
       "type": "process",
-      "command": "${workspaceFolder}/.venv/bin/ruff",
+      "command": "uv",
       "args": [
+        "run",
+        "--locked",
+        "ruff",
         "check",
         "--no-cache",
         "src/pythonsrc"
