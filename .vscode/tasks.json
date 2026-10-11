@@ -31,6 +31,38 @@
       "group": "build"
     },
     {
+      "label": "ROS sandbox: build",
+      "detail": "colcon build rossrc into output/rossrc (dev container)",
+      "type": "shell",
+      "command": "source /opt/ros/jazzy/setup.bash && colcon --log-base output/rossrc/log build --base-paths rossrc --build-base output/rossrc/build --install-base output/rossrc/install --symlink-install",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "bash",
+          "args": ["-c"]
+        }
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "ROS sandbox: self-check",
+      "detail": "Launch the C++ talker and Python listener; exits after 5 messages",
+      "type": "shell",
+      "command": "source output/rossrc/install/setup.bash && ros2 launch hello_py hello.launch.py max_messages:=5",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "shell": {
+          "executable": "bash",
+          "args": ["-c"]
+        }
+      },
+      "dependsOn": "ROS sandbox: build",
+      "problemMatcher": []
+    },
+    {
       "label": "Python: lint",
       "type": "process",
       "command": "uv",

@@ -1,6 +1,6 @@
 # 学习沙盒工具链
 
-`cppsrc/` 与 `pythonsrc/` 是独立的 C++ / Python 学习沙盒，`src/` 下的项目模块不依赖它们。两者都在 `dev` 容器中构建和运行（VS Code 默认 Dev Container，或 `./scripts/lab ros-shell`）。
+`cppsrc/`、`pythonsrc/`、`rossrc/` 是独立的 C++、Python、ROS 2 学习沙盒，`src/` 下的项目模块不依赖它们。三者都在 `dev` 容器中构建和运行（VS Code 默认 Dev Container，或 `./scripts/lab ros-shell`）。
 
 ## C++：`cppsrc/`
 
@@ -43,3 +43,27 @@ uv run ruff format .
 VS Code 默认解释器为 `/opt/learning-venv/bin/python`，终端不自动激活虚拟环境。若编辑器保存过旧选择，执行 `Python: Select Interpreter` 重新选择。
 
 修改依赖：编辑 `pythonsrc/pyproject.toml`，执行 `uv lock --project pythonsrc`，然后重建 `dev` 镜像。Ruff 规则在仓库根目录的 `ruff.toml`，对 `scripts/`、`src/`、`pythonsrc/` 统一生效。
+
+## ROS 2：`rossrc/`
+
+`rossrc/` 是一个 colcon 工作区的源码根，包含最小的跨语言收发示例：
+
+| 包 | 构建类型 | 内容 |
+|---|---|---|
+| `hello_cpp` | ament_cmake | `talker`：以 `rate_hz`（默认 2）在 `/hello` 发布 `std_msgs/String` |
+| `hello_py` | ament_python | `listener`：订阅 `/hello`，参数 `max_messages > 0` 时收满即退出；`hello.launch.py` 同时启动两者，listener 退出时整体结束 |
+
+ROS 包使用系统 Python 与 libstdc++、C++17，与 `cppsrc/` 的 libc++ / C++26 设置无关。构建产物放 `output/rossrc`，`--symlink-install` 让 Python 与 launch 文件的修改无需重新构建：
+
+```bash
+colcon --log-base output/rossrc/log build --base-paths rossrc \
+  --build-base output/rossrc/build --install-base output/rossrc/install --symlink-install
+source output/rossrc/install/setup.bash
+
+ros2 launch hello_py hello.launch.py max_messages:=5   # 自检：收发 5 条后退出，返回 0
+ros2 launch hello_py hello.launch.py                   # 持续运行，Ctrl+C 结束
+```
+
+也可以在两个终端分别运行 `ros2 run hello_cpp talker`、`ros2 run hello_py listener`，再用 `ros2 node list`、`ros2 topic info /hello`、`ros2 topic echo /hello` 观察。VS Code 任务 `ROS sandbox: build` 与 `ROS sandbox: self-check` 执行同样的命令；默认 Dev Container 为 C/C++ 扩展加入了 `/opt/ros/jazzy/include`，ROS 头文件可以被识别。
+
+这里只验证 `dev` 容器内的 ROS 通信；与 `sim`、`policy` 的连接属于路线图后续步骤。项目自己的 ROS 包放 `src/ros`，构建到 `output/ros`。

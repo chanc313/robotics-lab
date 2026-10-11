@@ -29,6 +29,10 @@
         "python.analysis.extraPaths": [
           "/opt/ros/jazzy/lib/python3.12/site-packages"
         ],
+        "C_Cpp.default.includePath": [
+          "${workspaceFolder}/**",
+          "/opt/ros/jazzy/include/**"
+        ],
         "cmake.configureOnOpen": true,
         "cmake.sourceDirectory": "/workspace/cppsrc",
         "cmake.buildDirectory": "/workspace/output/build/${buildType}"

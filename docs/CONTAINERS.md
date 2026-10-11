@@ -97,7 +97,7 @@ docker compose exec dev bash -c 'source /opt/ros/jazzy/setup.bash && ros2 pkg pr
 - ROS 变量在 `compose.yaml` 的 `x-ros-env` 中统一定义，`dev` 与 `sim` 共用；`ROS_DOMAIN_ID`、`RMW_IMPLEMENTATION`、`FASTDDS_BUILTIN_TRANSPORTS` 可在 `.env` 覆盖。Isaac 自带 Fast DDS 与 Cyclone DDS 两种 RMW，`dev` 目前只装 Fast DDS，改用 Cyclone DDS 前需在 `docker/Dockerfile.dev` 加 `ros-jazzy-rmw-cyclonedds-cpp`。
 - `sim` 使用 Isaac 自带的 Jazzy bridge 库，不安装 ROS apt 包，也不加载 `dev` 的 `/opt/ros`。桥接双方需要匹配 domain、消息类型与 QoS。
 
-ROS 包放在 `src/ros`，构建产物放 `output/ros`，不在仓库根目录运行 colcon：
+项目的 ROS 包放在 `src/ros`，构建产物放 `output/ros`，不在仓库根目录运行 colcon（最小收发示例见学习沙盒 `rossrc/`，[学习沙盒工具链](TOOLCHAIN.md#ros-2rossrc)）：
 
 ```bash
 rosdep update

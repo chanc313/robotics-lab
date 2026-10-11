@@ -7,4 +7,4 @@
 - 业务消息与 QoS 在路线图第 2 步的接口契约确定后再定义，优先使用标准消息。
 - ROS C++ 使用与官方二进制包一致的 libstdc++。
 
-目前没有自有 ROS 包。模块约定与依赖规则见 [开发指南](../../docs/DEVELOPMENT.md)。
+目前没有自有 ROS 包；最小的 C++ / Python 收发示例在学习沙盒 `rossrc/`，见 [学习沙盒工具链](../../docs/TOOLCHAIN.md#ros-2rossrc)。模块约定与依赖规则见 [开发指南](../../docs/DEVELOPMENT.md)。
