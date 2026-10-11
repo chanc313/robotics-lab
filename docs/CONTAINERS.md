@@ -177,8 +177,8 @@ IMAGE_PREFIX=ghcr.io/chanc313/robotics-lab IMAGE_TAG=<版本> ./scripts/lab publ
 
 | 镜像 | 日期 | 源码 | digest |
 |---|---|---|---|
-| `ghcr.io/chanc313/robotics-lab-dev:v0.1.0` | 2026-10-12 | `9b6385e` + 未提交改动 | `sha256:936982f59eeeada9ab39fa9f1800aba47e75a21d1f8f1d3568b225b308939a9c` |
-| `ghcr.io/chanc313/robotics-lab-policy:v0.1.0` | 2026-10-12 | `9b6385e` + 未提交改动 | `sha256:26609907c492809220b0fb228c5b0662bdf3f4ce66981050189a78abd4675183` |
+| `ghcr.io/chanc313/robotics-lab-dev:v0.1.0` | 2026-10-12 | `e129f9e` | `sha256:936982f59eeeada9ab39fa9f1800aba47e75a21d1f8f1d3568b225b308939a9c` |
+| `ghcr.io/chanc313/robotics-lab-policy:v0.1.0` | 2026-10-12 | `e129f9e` | `sha256:26609907c492809220b0fb228c5b0662bdf3f4ce66981050189a78abd4675183` |
 | `ghcr.io/chanc313/robotics-lab-sim:v0.1.0` | 待推送 | | |
 
 ## 依据
