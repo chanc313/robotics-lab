@@ -163,9 +163,10 @@ IMAGE_PREFIX=ghcr.io/chanc313/robotics-lab IMAGE_TAG=<版本> ./scripts/lab publ
 
 已构建的镜像再次 `build` 会完全命中缓存，只是增加 registry 名称的标签。GHCR 新推送的包默认私有。镜像中包含 Isaac Sim 等 NVIDIA 软件，改为公开前先确认相应许可是否允许再分发。
 
-使用端克隆仓库，把相同的 `IMAGE_PREFIX`、`IMAGE_TAG` 写入 `.env`，再执行：
+使用端克隆仓库，把相同的 `IMAGE_PREFIX`、`IMAGE_TAG` 写入 `.env`。镜像是私有的，拉取前需用有读取权限的账号登录：
 
 ```bash
+docker login ghcr.io
 ./scripts/lab prepare
 ./scripts/lab pull
 ./scripts/lab check-installation ros

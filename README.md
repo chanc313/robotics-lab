@@ -38,6 +38,8 @@ output/                          运行产物（Git 忽略）：storage → /dat
 ./scripts/lab help            # 全部入口
 ```
 
+也可以直接拉取已发布的私有镜像（当前 `v0.1.0`），免去本地构建：先 `docker login ghcr.io`，在 `.env` 写入 `IMAGE_PREFIX=ghcr.io/chanc313/robotics-lab` 与 `IMAGE_TAG=v0.1.0`，再执行 `./scripts/lab pull`。
+
 运行 Isaac 前，本人接受 Isaac Sim 许可后，在 `.env` 取消注释 `OMNI_KIT_ACCEPT_EULA=YES`、`ACCEPT_EULA=Y`。VS Code 用户在 **Dev Containers: Reopen in Container** 中选择 dev、sim 或 policy 配置。
 
 常用入口：
