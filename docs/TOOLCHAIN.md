@@ -20,13 +20,13 @@ cmake --build output/build/Release --target main
 
 两种模式使用独立构建目录，切换时无需清理。Debug 保留调试信息、通常不优化；Release 启用优化并通常定义 `NDEBUG`，不要让程序逻辑依赖 `assert` 的副作用。新增源码需要在 `add_executable` 中显式列出，CMake 不自动扫描。
 
-VS Code（CMake Tools 与 C/C++ 扩展）：
+VS Code：
 
-- `CMake: Select a Kit` 选择 `[Unspecified]`，让 CMake 从 `CXX` 选择编译器；
-- `CMake: Select Variant` 选择 Debug 或 Release，默认 Debug；
-- Ctrl+Shift+B 配置并构建 `main`；Run and Debug 选择 `C++: main`，F5 调试；
-- 不要用 C/C++ 扩展的“构建活动文件”，它绕过 CMake 的标准与头文件设置；
-- 更换编译器或标准库后执行 `CMake: Delete Cache and Reconfigure`，Debug 与 Release 目录分别重置。
+- Ctrl+Shift+B 运行默认任务 `C++: build (Debug)`；`C++: build (Release)` 在 **Tasks: Run Task** 中。两个任务直接调用 `cmake`，不依赖 CMake Tools，因此在 sim / policy 容器中打开同一仓库也不会报缺少 `cmake` 任务类型。
+- Run and Debug 选择 `C++: main (Debug)`，F5 先构建再用 GDB 调试。
+- CMake Tools 只负责为 C/C++ 扩展提供编译配置（IntelliSense），打开 dev 容器时会自动配置 `output/build/Debug`。`CMake: Select a Kit` 选择 `[Unspecified]`，让 CMake 从 `CXX` 选择编译器。
+- 不要用 C/C++ 扩展的“构建活动文件”，它绕过 CMake 的标准与头文件设置。
+- 更换编译器或标准库后删除对应的 `output/build/<模式>` 目录再构建。
 
 ## Python：`pythonsrc/`
 

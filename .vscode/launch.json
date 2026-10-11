@@ -2,16 +2,16 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "C++: main",
+      "name": "C++: main (Debug)",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${command:cmake.launchTargetPath}",
+      "program": "${workspaceFolder}/output/build/Debug/bin/main",
       "args": [],
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
       "MIMode": "gdb",
       "miDebuggerPath": "${env:DEBUGGER}",
-      "preLaunchTask": "C++: build"
+      "preLaunchTask": "C++: build (Debug)"
     },
     {
       "name": "Python learning: current file (development container)",

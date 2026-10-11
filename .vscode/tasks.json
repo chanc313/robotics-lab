@@ -2,19 +2,13 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "C++: configure",
-      "type": "cmake",
-      "command": "configure",
-      "problemMatcher": []
-    },
-    {
-      "label": "C++: build",
-      "type": "cmake",
-      "command": "build",
-      "targets": [
-        "main"
-      ],
-      "dependsOn": "C++: configure",
+      "label": "C++: build (Debug)",
+      "detail": "Configure and build cppsrc into output/build/Debug",
+      "type": "shell",
+      "command": "cmake -S cppsrc -B output/build/Debug -G Ninja -DCMAKE_BUILD_TYPE=Debug && cmake --build output/build/Debug --target main",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "problemMatcher": [
         "$gcc"
       ],
@@ -22,6 +16,19 @@
         "kind": "build",
         "isDefault": true
       }
+    },
+    {
+      "label": "C++: build (Release)",
+      "detail": "Configure and build cppsrc into output/build/Release",
+      "type": "shell",
+      "command": "cmake -S cppsrc -B output/build/Release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build output/build/Release --target main",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": "build"
     },
     {
       "label": "Python: lint",
