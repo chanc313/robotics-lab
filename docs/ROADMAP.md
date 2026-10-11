@@ -24,7 +24,7 @@ flowchart LR
 每一步都在上一步可运行的基础上增加一层，避免同时引入 ROS、控制与真机三类不确定性。
 
 1. **跑通上游基线回路。** 下载 `nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation`（revision `gn1_6`），运行 `policy-server` 与 `g1-evaluate`，记录成功率、episode 数、推理延迟和显存峰值。本机 GPU 为 12 GB，带相机的仿真与 GR00T 3B 同卡运行可能不够；不够时把 `policy` 放到远程 GPU，评估端已支持 `--remote_host`。
-2. **写接口契约。** 在 `docs/` 写清楚：43 自由度关节顺序（上游 `isaaclab_arena_gr00t/embodiments/g1/43dof_joint_space.yaml`）、单位与坐标系、50 Hz 控制与 50 步动作块、时间戳与 `use_sim_time`、超时与失效语义。先有文档，再写适配代码。
+2. **写接口契约。** 在 `docs/` 写清楚：43 自由度关节顺序（上游 `isaaclab_arena_gr00t/embodiments/g1/43dof_joint_space.yaml`）、单位与坐标系、50 Hz 控制与 50 步动作块、时间戳与 `use_sim_time`、超时与失效语义。先有文档，再写适配代码。同时确定各话题的 QoS 与传输方式：当前全部走 UDPv4；传图像、点云等大数据时，先用 `ros2 topic hz` / `bw` 测量，再考虑给 `dev` 加 `ipc: host` 并启用 Fast DDS 共享内存，或用同进程组合节点实现零拷贝。
 3. **ROS 作为旁路观察者。** Isaac 的 ROS 2 bridge 发布 `/clock`、`/joint_states`、`/tf` 与头部相机，`dev` 中用 RViz 查看、用 rosbag 记录到 `/runs`。不改变回路时序。优先用标准消息；自定义消息需要在 `dev` 构建后，再让 `sim` 中 Isaac 自带的 ROS 库加载，链路更长。
 4. **ROS 进入回路（部署形态）。** 策略输出改走 ROS 话题，引入真实的异步与延迟，与第 1 步指标对比，量化通信带来的损失。RL 训练的内层循环始终不经过 ROS。
 5. **真机与控制核心。** 接入真机时编写控制核心，以动态库形式提供给其他层调用：
