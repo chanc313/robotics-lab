@@ -1,0 +1,87 @@
+# syntax=docker/dockerfile:1
+# check=skip=InvalidDefaultArgInFrom
+# Base images are pinned once in compose.yaml (x-build-args), hence no ARG defaults.
+ARG UV_IMAGE
+ARG UBUNTU_IMAGE
+FROM ${UV_IMAGE} AS uv
+
+FROM ${UBUNTU_IMAGE} AS base
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LOCAL_UID=1000
+ARG LOCAL_GID=1000
+# ROS_DISTRO selects Isaac's bundled Jazzy bridge; RMW settings come from compose (x-ros-env).
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
+    UV_LINK_MODE=copy \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics,display \
+    ROS_DISTRO=jazzy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git build-essential cmake pkg-config ffmpeg \
+    libegl1 libgl1 libglu1-mesa libvulkan1 libx11-6 libxext6 libxi6 \
+    libxrandr2 libxinerama1 libxcursor1 libxrender1 libxt6 libsm6 libice6 \
+    libglib2.0-0 libnss3 libasound2t64 libgomp1 libfontconfig1 libfreetype6 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=uv /uv /uvx /usr/local/bin/
+RUN if id ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
+    && if ! getent group "$LOCAL_GID" >/dev/null; then groupadd --gid "$LOCAL_GID" dev; fi \
+    && useradd --uid "$LOCAL_UID" --gid "$LOCAL_GID" --create-home --shell /bin/bash dev \
+    && mkdir -p /opt/arena /opt/python /workspace /data \
+       /home/dev/.cache /home/dev/.local/share /home/dev/.config \
+    && chown dev:"$LOCAL_GID" /opt/arena /opt/python /workspace /data \
+    && chown -R dev:"$LOCAL_GID" /home/dev
+WORKDIR /opt/arena
+
+# Install stage: everything under /opt is created here, then split into buckets.
+FROM base AS install
+ARG LOCAL_GID=1000
+ARG UV_CACHE_DIR=/tmp/uv-cache
+ENV UV_HTTP_TIMEOUT=3600 UV_HTTP_RETRIES=5 UV_CONCURRENT_DOWNLOADS=8
+# The cache id is historical; keeping it reuses tens of GB of downloaded wheels across rebuilds.
+RUN --mount=type=cache,id=/root/.cache/uv,target=/tmp/uv-cache \
+    chown -R dev:"$LOCAL_GID" /tmp/uv-cache
+USER dev
+COPY docker/versions.env /tmp/versions.env
+COPY --chmod=755 docker/fetch_arena.sh /tmp/fetch_arena.sh
+RUN /tmp/fetch_arena.sh submodules/IsaacLab submodules/Isaac-GR00T
+COPY docker/split_layers.py /tmp/split_layers.py
+# Arena's supported uv installation with its complete lock. Frozen is intentional: the
+# pinned upstream metadata currently cannot be re-resolved. openpi-client and
+# simready-search serve upstream routes outside this project's GR00T scope. The empty
+# Kit data/cache/logs directories seed the named volumes with non-root ownership.
+RUN --mount=type=cache,id=/root/.cache/uv,target=/tmp/uv-cache \
+    . /tmp/versions.env && uv python install "$SIM_PYTHON_VERSION" \
+    && uv sync --frozen --extra dev --python "$SIM_PYTHON_VERSION" \
+    && uv pip install --python .venv/bin/python --no-deps \
+       msgpack==1.1.0 msgpack-numpy==0.4.8 pyzmq==27.0.1 \
+    && uv pip uninstall --python .venv/bin/python openpi-client simready-search \
+    && kit_dir=.venv/lib/python3.12/site-packages/isaacsim/kit \
+    && mkdir -p "$kit_dir/data" "$kit_dir/cache" "$kit_dir/logs" \
+    && .venv/bin/python -I -S /tmp/split_layers.py /opt /tmp/opt-layers 16 /opt/arena /opt/python
+
+FROM base AS sim
+ARG LOCAL_UID=1000
+ARG LOCAL_GID=1000
+# One layer per bucket keeps each layer far below GHCR's 10 GB limit and 10-minute upload timeout.
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/0/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/1/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/2/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/3/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/4/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/5/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/6/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/7/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/8/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/9/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/10/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/11/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/12/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/13/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/14/ /opt/
+COPY --from=install --chown=${LOCAL_UID}:${LOCAL_GID} /tmp/opt-layers/15/ /opt/
+# NVIDIA Container Toolkit supplies both the driver and its Vulkan ICD.
+# Adding another ICD here makes Kit enumerate the same GPU twice.
+COPY --chmod=755 docker/sim_entrypoint.sh /usr/local/bin/sim_entrypoint.sh
+USER dev
+ENV PATH=/opt/arena/.venv/bin:$PATH PYTHONUNBUFFERED=1
+ENTRYPOINT ["/usr/local/bin/sim_entrypoint.sh"]
+CMD ["bash"]

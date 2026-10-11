@@ -1,0 +1,18 @@
+# Local X11 only. Set XAUTHORITY to your session's cookie file; no xhost changes needed.
+services:
+  sim:
+    environment:
+      DISPLAY: ${DISPLAY:?GUI requires a Linux X11 desktop DISPLAY}
+      XAUTHORITY: /tmp/robotics-lab.xauthority
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${XAUTHORITY:?Set XAUTHORITY to the current session cookie file}:/tmp/robotics-lab.xauthority:ro
+  dev:
+    gpus: all
+    environment:
+      DISPLAY: ${DISPLAY:?GUI requires a Linux X11 desktop DISPLAY}
+      XAUTHORITY: /tmp/robotics-lab.xauthority
+      NVIDIA_DRIVER_CAPABILITIES: graphics,display,utility
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+      - ${XAUTHORITY:?Set XAUTHORITY to the current session cookie file}:/tmp/robotics-lab.xauthority:ro

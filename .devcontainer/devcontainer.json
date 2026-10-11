@@ -1,12 +1,18 @@
 {
-  "name": "C++ / Python development",
-  "dockerComposeFile": "../compose.yaml",
+  "name": "Robotics lab dev (ROS 2 Jazzy / C++ / learning)",
+  "dockerComposeFile": [
+    "../compose.yaml",
+    "compose.devcontainer.yaml"
+  ],
   "service": "dev",
+  "runServices": [
+    "dev"
+  ],
   "workspaceFolder": "/workspace",
   "remoteUser": "dev",
   "updateRemoteUserUID": false,
-  "shutdownAction": "stopCompose",
-  "postCreateCommand": "uv sync --locked",
+  "shutdownAction": "none",
+  "initializeCommand": "./scripts/lab prepare",
   "customizations": {
     "vscode": {
       "extensions": [
@@ -17,7 +23,16 @@
         "charliermarsh.ruff",
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools"
-      ]
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/learning-venv/bin/python",
+        "python.analysis.extraPaths": [
+          "/opt/ros/jazzy/lib/python3.12/site-packages"
+        ],
+        "cmake.configureOnOpen": true,
+        "cmake.sourceDirectory": "/workspace/cppsrc",
+        "cmake.buildDirectory": "/workspace/output/build/${buildType}"
+      }
     }
   }
 }

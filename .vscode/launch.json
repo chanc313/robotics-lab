@@ -1,0 +1,53 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C++: main",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${command:cmake.launchTargetPath}",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "${env:DEBUGGER}",
+      "preLaunchTask": "C++: build"
+    },
+    {
+      "name": "Python learning: current file (development container)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/opt/learning-venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "ROS: current Python node (development container)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/usr/bin/python3",
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Isaac: current file (simulation container)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/opt/arena/.venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "/opt/arena"
+    },
+    {
+      "name": "GR00T: current file (policy container)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/opt/policy-venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "/opt/arena/submodules/Isaac-GR00T"
+    }
+  ]
+}

@@ -1,19 +1,99 @@
+# Fixed project name keeps container and volume names stable for any clone directory.
+name: robotics-lab
+
+# Shared base images, pinned by digest in one place. LOCAL_UID / LOCAL_GID come from .env.
+x-build-args: &build-args
+  UV_IMAGE: ghcr.io/astral-sh/uv:0.12.23@sha256:61d393e44e249f2e4b526b6c7ddcecce245946826e608e11c93ad4f5bba55b21
+  UBUNTU_IMAGE: ubuntu:24.04@sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55
+  LOCAL_UID: ${LOCAL_UID:-1000}
+  LOCAL_GID: ${LOCAL_GID:-1000}
+
+# ROS graph settings shared by dev and the Isaac ROS bridge in sim.
+# Isaac bundles both rmw_fastrtps_cpp and rmw_cyclonedds_cpp; dev currently installs Fast DDS only.
+x-ros-env: &ros-env
+  ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+  RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
+  FASTDDS_BUILTIN_TRANSPORTS: ${FASTDDS_BUILTIN_TRANSPORTS:-UDPv4}
+
 services:
   dev:
+    image: ${IMAGE_PREFIX:-robotics-lab}-dev:${IMAGE_TAG:-latest}
     build:
       context: .
-      target: dev
+      dockerfile: docker/Dockerfile.dev
       args:
-        LOCAL_UID: ${LOCAL_UID:-1000}
-        LOCAL_GID: ${LOCAL_GID:-1000}
+        <<: *build-args
     init: true
+    network_mode: host
+    environment:
+      <<: *ros-env
     working_dir: /workspace
     command: ["sleep", "infinity"]
     volumes:
       - .:/workspace
-      - python-env:/workspace/.venv
-      - cpp-build:/workspace/output
+      - ./output/storage:/data
+      - ./output/runs:/runs
+
+  sim:
+    image: ${IMAGE_PREFIX:-robotics-lab}-sim:${IMAGE_TAG:-arena-0.3.0}
+    profiles: [sim]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.sim
+      args:
+        <<: *build-args
+    init: true
+    network_mode: host
+    ipc: host
+    gpus: all
+    environment:
+      <<: *ros-env
+      OMNI_KIT_ACCEPT_EULA: ${OMNI_KIT_ACCEPT_EULA:-}
+      ACCEPT_EULA: ${ACCEPT_EULA:-}
+      HF_HOME: /home/dev/.cache/huggingface
+      # The image has no ~/.nv; keep the CUDA JIT cache on the persistent cache volume.
+      CUDA_CACHE_PATH: /home/dev/.cache/nv/ComputeCache
+    command: ["sleep", "infinity"]
+    volumes:
+      - .:/workspace
+      - ./output/storage:/data
+      - ./output/runs:/runs
+      - sim-cache:/home/dev/.cache
+      - sim-share:/home/dev/.local/share
+      - sim-config:/home/dev/.config
+      - sim-kit-data:/opt/arena/.venv/lib/python3.12/site-packages/isaacsim/kit/data
+      - sim-kit-cache:/opt/arena/.venv/lib/python3.12/site-packages/isaacsim/kit/cache
+      - sim-kit-logs:/opt/arena/.venv/lib/python3.12/site-packages/isaacsim/kit/logs
+
+  policy:
+    image: ${IMAGE_PREFIX:-robotics-lab}-policy:${IMAGE_TAG:-gr00t-n1.6}
+    profiles: [policy]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.policy
+      args:
+        <<: *build-args
+    init: true
+    network_mode: host
+    ipc: host
+    gpus: all
+    environment:
+      HF_HOME: /home/dev/.cache/huggingface
+      TRITON_CACHE_DIR: /home/dev/.cache/triton
+      CUDA_CACHE_PATH: /home/dev/.cache/nv/ComputeCache
+      NO_ALBUMENTATIONS_UPDATE: "1"
+    command: ["sleep", "infinity"]
+    volumes:
+      - .:/workspace
+      - ./output/storage:/data
+      - ./output/runs:/runs
+      - policy-cache:/home/dev/.cache
 
 volumes:
-  python-env:
-  cpp-build:
+  sim-cache:
+  sim-share:
+  sim-config:
+  sim-kit-data:
+  sim-kit-cache:
+  sim-kit-logs:
+  policy-cache:

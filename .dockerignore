@@ -1,15 +1,9 @@
+# Images copy only docker/ and pythonsrc/ dependency manifests; keep the context small.
 .git
-.venv
 output
-build
-install
-log
-__pycache__
-.ruff_cache
-.ipynb_checkpoints
-data
-models
-datasets
-dist
+**/.venv
+**/__pycache__
+**/.ruff_cache
+**/.ipynb_checkpoints
 .env
 .env.*

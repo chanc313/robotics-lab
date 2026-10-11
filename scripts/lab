@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+project_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+cd "$project_dir"
+compose=(docker compose --project-directory "$project_dir" -f "$project_dir/compose.yaml")
+
+prepare() {
+    mkdir -p output/runs/rl output/storage/{models,datasets,assets}
+    if [[ ! -e .env ]]; then
+        printf 'LOCAL_UID=%s\nLOCAL_GID=%s\nROS_DOMAIN_ID=0\n' "$(id -u)" "$(id -g)" > .env
+        printf '# After accepting the Isaac Sim license, set OMNI_KIT_ACCEPT_EULA=YES and ACCEPT_EULA=Y.\n' >> .env
+    fi
+}
+
+gui_compose() {
+    if [[ -z "${DISPLAY:-}" ]]; then
+        echo 'GUI requires a Linux desktop terminal with DISPLAY set.' >&2
+        exit 1
+    fi
+    export XAUTHORITY=${XAUTHORITY:-$HOME/.Xauthority}
+    if [[ ! -r "$XAUTHORITY" ]]; then
+        echo "X11 cookie file is not readable: $XAUTHORITY" >&2
+        exit 1
+    fi
+    compose+=(-f "$project_dir/compose.gui.yaml")
+}
+
+command=${1:-help}
+if [[ $# -gt 0 ]]; then shift; fi
+if [[ "$command" != help ]] && ! command -v docker >/dev/null; then
+    echo 'Run scripts/lab in the Linux host terminal. It starts code inside Docker.' >&2
+    exit 1
+fi
+case "$command" in
+    prepare)
+        prepare
+        "${compose[@]}" config --quiet
+        ;;
+    build)
+        prepare
+        if [[ $# -eq 0 ]]; then set -- dev sim policy; fi
+        exec "${compose[@]}" build "$@"
+        ;;
+    pull)
+        prepare
+        if [[ $# -eq 0 ]]; then set -- dev sim policy; fi
+        exec "${compose[@]}" pull "$@"
+        ;;
+    publish)
+        if [[ $# -eq 0 ]]; then set -- dev sim policy; fi
+        exec "${compose[@]}" push "$@"
+        ;;
+    check-installation)
+        prepare
+        scope=${1:-}
+        case "$scope" in
+            ros) service=dev; interpreter=/usr/bin/python3 ;;
+            sim) service=sim; interpreter=/opt/arena/.venv/bin/python ;;
+            policy) service=policy; interpreter=/opt/policy-venv/bin/python ;;
+            *) echo 'Use: scripts/lab check-installation ros|sim|policy' >&2; exit 2 ;;
+        esac
+        exec "${compose[@]}" run --rm --no-deps "$service" "$interpreter" \
+            /workspace/scripts/check_installation.py "$scope"
+        ;;
+    dev)
+        prepare
+        exec "${compose[@]}" up -d dev
+        ;;
+    ros-shell)
+        prepare
+        exec "${compose[@]}" run --rm --no-deps dev bash
+        ;;
+    sim)
+        prepare
+        if [[ $# -eq 0 ]]; then set -- bash; fi
+        exec "${compose[@]}" run --rm --no-deps sim "$@"
+        ;;
+    sim-gui)
+        prepare
+        gui_compose
+        if [[ $# -eq 0 ]]; then
+            set -- python isaaclab_arena/scripts/environment_runner.py --viz kit --device cpu --num_envs 1 cube_goal_pose
+        fi
+        exec "${compose[@]}" run --rm --no-deps sim "$@"
+        ;;
+    tutorial)
+        prepare
+        gui_compose
+        tutorial=${1:-basic}
+        if [[ $# -gt 0 ]]; then shift; fi
+        case "$tutorial" in
+            basic) script=submodules/IsaacLab/scripts/tutorials/00_sim/launch_app.py; set -- --viz kit "$@" ;;
+            ik) script=submodules/IsaacLab/scripts/tutorials/05_controllers/run_diff_ik.py; set -- --robot franka_panda --num_envs 1 --viz kit "$@" ;;
+            *) echo 'Use: scripts/lab tutorial basic|ik [arguments]' >&2; exit 2 ;;
+        esac
+        exec "${compose[@]}" run --rm --no-deps sim python "$script" "$@"
+        ;;
+    evaluate)
+        prepare
+        gui_compose
+        if [[ $# -eq 0 ]]; then
+            set -- --viz kit --device cpu --policy_type zero_action --num_episodes 1 --output_base_dir /runs/learning/evaluation cube_goal_pose
+        fi
+        exec "${compose[@]}" run --rm --no-deps sim python isaaclab_arena/evaluation/policy_runner.py "$@"
+        ;;
+    rviz)
+        prepare
+        gui_compose
+        exec "${compose[@]}" run --rm --no-deps dev rviz2 "$@"
+        ;;
+    train)
+        prepare
+        if [[ $# -eq 0 ]]; then
+            set -- --task Isaac-Cartpole-v0 --num_envs 32 --max_iterations 2 --headless --viz none physics=physx
+        fi
+        # Upstream writes relative logs/; keep them on the persistent runs mount.
+        exec "${compose[@]}" run --rm --no-deps --workdir /runs/rl sim \
+            python /opt/arena/submodules/IsaacLab/scripts/reinforcement_learning/rsl_rl/train.py "$@"
+        ;;
+    policy-shell)
+        prepare
+        exec "${compose[@]}" run --rm --no-deps policy bash
+        ;;
+    policy-train)
+        prepare
+        # No arguments shows the upstream help; training is a later experiment step.
+        if [[ $# -eq 0 ]]; then set -- --help; fi
+        exec "${compose[@]}" run --rm --no-deps policy \
+            python gr00t/experiment/launch_finetune.py --output-dir /runs/gr00t/train "$@"
+        ;;
+    policy-server)
+        prepare
+        source experiments/arena_g1/experiment.env
+        exec "${compose[@]}" run --rm --no-deps policy python gr00t/eval/run_gr00t_server.py \
+            --model-path "${POLICY_MODEL_PATH:-/data/models/arena-g1/checkpoint-20000}" \
+            --embodiment-tag NEW_EMBODIMENT --device cuda --host 127.0.0.1 \
+            --port "${POLICY_PORT:-5555}" "$@"
+        ;;
+    policy-ping)
+        prepare
+        source experiments/arena_g1/experiment.env
+        exec "${compose[@]}" run --rm --no-deps policy python \
+            /opt/arena/isaaclab_arena_gr00t/utils/wait_for_gr00t_server.py \
+            --host 127.0.0.1 --port "${POLICY_PORT:-5555}" \
+            --timeout-sec 30 --poll-interval-sec 2 --request-timeout-ms 3000 "$@"
+        ;;
+    g1-evaluate)
+        prepare
+        source experiments/arena_g1/experiment.env
+        gui_compose
+        # Only this upstream integration uses the GR00T client source in Python 3.12.
+        # The complete GR00T model package is installed exclusively in policy (3.10).
+        exec "${compose[@]}" run --rm --no-deps sim \
+            env PYTHONPATH=/opt/arena/submodules/Isaac-GR00T \
+            python isaaclab_arena/evaluation/policy_runner.py \
+            --viz kit --device cpu --enable_cameras \
+            --policy_type isaaclab_arena_gr00t.policy.gr00t_remote_closedloop_policy.Gr00tRemoteClosedloopPolicy \
+            --policy_config_yaml_path "$G1_POLICY_CONFIG" \
+            --remote_host 127.0.0.1 --remote_port "${POLICY_PORT:-5555}" \
+            --num_episodes 1 --output_base_dir /runs/arena-g1/evaluation \
+            "$G1_TASK" --object brown_box --embodiment "$G1_EMBODIMENT" "$@"
+        ;;
+    help)
+        cat <<'HELP'
+Run from the Linux host terminal in this repository:
+  scripts/lab prepare          Create data directories and local identity configuration
+  scripts/lab build            Build ROS (with RViz), simulation and AI images
+  scripts/lab pull             Pull images configured by IMAGE_PREFIX / IMAGE_TAG
+  scripts/lab publish          Push built images to the configured registry
+  scripts/lab check-installation ros|sim|policy
+                              Check frameworks only; no communication or training
+  scripts/lab dev              Start the ROS development container
+  scripts/lab ros-shell        Open a separate ROS development shell
+  scripts/lab sim [command]    Run a shell or command in the simulation container
+  scripts/lab sim-gui [cmd]    Keep Arena GUI open, or run a custom GUI command
+  scripts/lab tutorial basic   Open the Isaac cube tutorial
+  scripts/lab tutorial ik      Open the Franka IK tutorial
+  scripts/lab evaluate [args]  Evaluate one zero-action episode with GUI by default
+  scripts/lab rviz             Run RViz from the ROS development image
+  scripts/lab train [args]     Run RL training (a short Cartpole run by default)
+  scripts/lab policy-shell     Open the GR00T development shell
+  scripts/lab policy-train     GR00T finetuning (help unless arguments are supplied)
+  scripts/lab policy-server    Serve the downloaded G1 checkpoint on loopback:5555
+  scripts/lab policy-ping      Check the GR00T endpoint with a finite timeout
+  scripts/lab g1-evaluate      Evaluate G1 against the already running policy service
+HELP
+        ;;
+    *) echo "Unknown command: $command. Run scripts/lab help." >&2; exit 2 ;;
+esac

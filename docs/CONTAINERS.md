@@ -1,80 +1,188 @@
-# 通用容器开发
+# 容器指南
 
-## 文件分工
+ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GPU 驱动、显示和文件存储，主机原生的 ROS、Isaac、模型 Python 环境不参与项目。镜像分工见 [README](../README.md)。下文的 `./scripts/lab` 命令都在 **Linux 主机终端**、仓库根目录执行，它们启动对应容器并在其中运行程序。
 
-| 文件 | 负责什么 |
-|---|---|
-| Dockerfile | 安装容器系统工具与编译器，提供非 root 开发用户；没有业务代码或数据库 |
-| compose.yaml | 启动 dev 服务，绑定源码目录，管理 Python 环境和编译产物卷 |
-| .dockerignore | 排除构建上下文中的虚拟环境、Git 历史、缓存和数据 |
-| .devcontainer/devcontainer.json | 让 VS Code 连接 dev 服务，安装开发扩展并执行 uv sync --locked |
-| pyproject.toml / uv.lock | 在容器或本机分别重建 Python 依赖 |
-
-原仓库的 ROS Jazzy/Gazebo Dockerfile 已移除，通用镜像不包含 ROS/Isaac。当前仍是无业务逻辑的开发骨架，没有生产服务入口。Dockerfile/Compose/Dev Containers 是声明式开发配置，没有恢复安装脚本或业务脚本。
-
-## 启动与停止
-
-在项目根目录执行：
+## 1. 准备与构建
 
 ```bash
-docker compose up -d --build dev
-docker compose exec dev uv sync --locked
-docker compose exec dev bash
+./scripts/lab prepare
+./scripts/lab build             # 或只构建其中一个：./scripts/lab build dev
 ```
 
-容器中仍使用 uv、CMake 与相同任务：
+`prepare` 创建 `output/storage/{models,datasets,assets}` 与 `output/runs/rl`，并在 `.env` 不存在时写入当前 UID/GID 和默认 ROS domain，已有 `.env` 不覆盖。这些目录必须由当前用户创建：缺失的绑定目录会被 Docker 以 root 身份自动创建，容器内的 `dev` 用户随后无法写入。
+
+构建配置集中在 `compose.yaml`：
+
+- `x-build-args` 按摘要固定共享基础镜像（uv、Ubuntu 24.04），并传入 `.env` 中的 UID/GID；`policy` 的 CUDA 基础镜像只在 `docker/Dockerfile.policy` 使用，也按摘要固定。三个 Dockerfile 的基础镜像参数没有默认值，需经 compose 构建。
+- `docker/versions.env` 固定 Arena / Isaac Lab / GR00T 提交、Arena 锁的 SHA-256 和两个 Python 版本。`sim` 拉取 Isaac Lab 与 GR00T 子模块，`policy` 只拉取 GR00T。
+- `sim` 安装的约 28 GB 文件在构建时由 `docker/split_layers.py` 均分为 16 个镜像层。GHCR 拒绝超过 10 GB 的层，单次上传 10 分钟超时，整块一层既推不上去，也难以在超时内传完。上游依赖增长后若单层接近 2 GB，增加 `Dockerfile.sim` 中的分层数。
+- 构建期 uv 下载缓存保存在 BuildKit 缓存中，重建时复用；不要随意清理 Docker 构建缓存，否则下一次重建要重新下载数十 GB 依赖。
+
+apt 包未逐个固定版本，因此可以复建，但不保证逐字节相同。
+
+运行 Isaac 前，本人接受 Isaac Sim 许可后，在 `.env` 取消注释：
+
+```dotenv
+OMNI_KIT_ACCEPT_EULA=YES
+ACCEPT_EULA=Y
+```
+
+`prepare` 不会替新使用者接受许可。
+
+### 安装检查
 
 ```bash
-cmake --preset debug
-cmake --build --preset debug
-# 学习 C++26 时选独立构建模式
-cmake --preset debug-cpp26
-cmake --build --preset debug-cpp26
+./scripts/lab check-installation ros
+./scripts/lab check-installation sim
+./scripts/lab check-installation policy
 ```
 
-没有业务目标时，构建不会生成程序。需要科学计算依赖时执行 uv sync --locked --extra science。
+- `ros`：rclpy、debugpy、ROS 示例包、RViz、rosdep、编译工具，以及学习沙盒环境；
+- `sim`：Python 依赖、CUDA 小算子、Isaac 自带 Jazzy 库、Isaac / Lab / Arena / RSL-RL 版本、GR00T 客户端源码导入，以及无界面空 Kit 启动；
+- `policy`：Python 依赖、CUDA 小算子、GR00T 与 DeepSpeed 导入、FlashAttention 小算子。
+
+检查不创建 ROS 通信图、训练环境或模型服务，也不下载权重。GUI 版本的 `sim` 检查：`./scripts/lab sim-gui python /workspace/scripts/check_installation.py sim --gui`，空窗口自动退出。`sim` 的 `uv pip check` 仍报告 coverage、websockets 两项上游元数据差异（见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)），安装检查通过不代表上游元数据完全一致。
+
+## 2. IDE
+
+在 VS Code 执行 **Dev Containers: Reopen in Container**（已有容器时用 **Rebuild Container**），选择配置：
+
+| 配置 | 用途 | 默认解释器 |
+|---|---|---|
+| Robotics lab dev | ROS、RViz、C++、学习沙盒 | `/opt/learning-venv/bin/python` |
+| Robotics lab sim | Isaac 任务开发、调试与 RL | `/opt/arena/.venv/bin/python` |
+| Robotics lab policy | GR00T 与模型代码 | `/opt/policy-venv/bin/python` |
+
+- 三个配置打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
+- 同时开发多个容器时，每个容器用一个 VS Code 窗口：**File: New Window** 后执行 **Dev Containers: Open Folder in Container...**，选择仓库根目录和另一个配置。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续运行。
+- `dev` 的 `python3` 是带 ROS 依赖的系统 Python，ROS 节点直接用它运行；学习沙盒环境不在 `PATH` 中，终端也不自动激活，见 [学习沙盒工具链](TOOLCHAIN.md)。Pylance 额外加载 ROS 的 Python 包路径。
+- `.vscode/launch.json` 为学习沙盒、ROS、Isaac、GR00T 各提供“当前文件”调试配置，选与当前容器相符的一项。
+- `sim` 配置加载 GUI 叠加文件，要求 VS Code 进程拿到当前的 `DISPLAY`、`XAUTHORITY` 并能读取会话 cookie；必要时从 Linux 桌面终端启动 VS Code。`dev` 配置不申请 GPU 和显示，需要 RViz 时用 `./scripts/lab rviz`。
+- IDE 打开容器时可能触发镜像构建；Docker Compose 需 ≥ 2.30 以支持 [`gpus` 配置](https://docs.docker.com/reference/compose-file/services/#gpus)。
+
+## 3. 启动与停止
 
 ```bash
-docker compose down
+./scripts/lab sim-gui                 # 持续保留 Arena 场景窗口
+./scripts/lab tutorial basic          # Isaac 入门方块教程
+./scripts/lab tutorial ik             # Franka IK 教程
+./scripts/lab evaluate                # 一次零策略 episode，评估结束后 GUI 关闭
+./scripts/lab rviz                    # RViz
+./scripts/lab sim                     # sim 容器 shell，或在后面接任意命令
+./scripts/lab ros-shell               # dev 容器 shell
 ```
 
-正常停止保留命名卷，下次启动可复用环境与编译缓存。down -v 会删除本项目命名卷，重建 Python 环境和编译产物才需要它；后续数据库卷也应独立管理。
-
-## VS Code
-
-已安装 Dev Containers 扩展后，在命令面板选择 Dev Containers: Reopen in Container。VS Code 使用 /workspace，首次创建后执行 uv sync --locked，之后 Ctrl+Shift+B 和 Python: lint 在容器中执行。F5 在出现真实业务入口后再配置。
-
-CLI 构建/运行与命令行 GDB 可验证容器环境；首次 VS Code 界面连接、扩展下载和 GUI 断点需要实际打开后确认。
-
-## 源码与环境隔离
-
-源码从本机绑定到 /workspace，编辑双方看到同一份文件。容器 .venv 被 python-env 命名卷覆盖，output 被 cpp-build 命名卷覆盖；宿主机 .venv 与构建产物不会被容器复用。Git 历史不会进入镜像，但本地开发的绑定挂载包含工作区历史，以便在开发终端使用 Git。
-
-默认开发 UID/GID=1000，与当前宿主用户一致。其他 Linux 用户应在首次构建前设置自己的 UID/GID，例如：
+自定义 GUI 评估与无界面评估：
 
 ```bash
-LOCAL_UID=$(id -u) LOCAL_GID=$(id -g) docker compose up -d --build dev
+./scripts/lab evaluate --viz kit --device cpu --policy_type zero_action \
+  --num_episodes 1 --output_base_dir /runs/my-experiment cube_goal_pose
+
+./scripts/lab sim python isaaclab_arena/evaluation/policy_runner.py \
+  --headless --device cpu --policy_type zero_action --num_steps 20 \
+  --output_base_dir /runs/headless-check cube_goal_pose
 ```
 
-Dev Containers 设置不自动改用户 UID，避免改变已有命名卷的所有权。对已有卷改变 UID 时应同时迁移其权限。
+这些命令在前台运行，Ctrl+C 停止，关闭 Kit 窗口也会结束 GUI 程序。`--rm` 容器退出后即删除，绑定目录与命名卷保留。需要保留日志时追加 `2>&1 | tee output/runs/<名称>.log`。不要用 `docker compose down -v` 停止日常工作，它会删除项目的命名卷。开发容器不挂载 Docker socket。
 
-镜像固定 Ubuntu 发布系列和 uv 版本，apt 安全更新随源变化；这不是逐字节完全相同的系统快照。Python 依赖受 uv.lock 控制。[uv 官方 Docker 集成](https://docs.astral.sh/uv/guides/integration/docker/)。
+## 4. ROS 与跨容器通信
 
-## 以后接入数据库与消息队列
+在 `dev` 的两个终端分别运行 `ros2 run demo_nodes_cpp talker` 和 `ros2 run demo_nodes_py listener`，看到 `I heard` 即通信正常。交互式 Bash 自动加载 `/opt/ros/jazzy/setup.bash`，入口脚本也会加载；`docker compose exec` 的非交互命令需显式加载：
 
-确定实际技术栈后，在 compose.yaml 添加独立 db、cache 或 broker 服务。每项只在真实需要时加入，不提前启动空数据库或放入示例凭据。
+```bash
+docker compose exec dev bash -c 'source /opt/ros/jazzy/setup.bash && ros2 pkg prefix demo_nodes_cpp'
+```
 
-- 每个服务使用明确版本的镜像，配置自己的持久卷。
-- 程序通过 Compose 服务名连接，例如服务名 db 对应容器内主机 db；localhost 指程序自身所在容器。
-- 用 healthcheck 检测真正就绪；需要强制依赖顺序时使用 depends_on 的 service_healthy 条件。仅容器启动不代表数据库可接受连接。[Docker 官方就绪与启动顺序说明](https://docs.docker.com/compose/how-tos/startup-order/)。
-- 应用还要支持连接重试，处理服务运行期间的重启。
-- 只发布本机或应用实际需要的端口，按需求设置可选 profiles。
-- 敏感配置用本地 .env 或 secrets，不进入 Git。数据迁移、备份和恢复属于具体业务设计。
+- 所有服务使用主机网络，默认 `ROS_DOMAIN_ID=0`，Fast DDS 只用 UDPv4。
+- ROS 变量在 `compose.yaml` 的 `x-ros-env` 中统一定义，`dev` 与 `sim` 共用；`ROS_DOMAIN_ID`、`RMW_IMPLEMENTATION`、`FASTDDS_BUILTIN_TRANSPORTS` 可在 `.env` 覆盖。Isaac 自带 Fast DDS 与 Cyclone DDS 两种 RMW，`dev` 目前只装 Fast DDS，改用 Cyclone DDS 前需在 `docker/Dockerfile.dev` 加 `ros-jazzy-rmw-cyclonedds-cpp`。
+- `sim` 使用 Isaac 自带的 Jazzy bridge 库，不安装 ROS apt 包，也不加载 `dev` 的 `/opt/ros`。桥接双方需要匹配 domain、消息类型与 QoS。
 
-Compose 默认提供本项目网络；当前仅有 dev，没有监听业务端口、数据库或消息队列。未来添加服务时复用这一入口，不需要为每个中间件在宿主机全局安装软件。
+ROS 包放在 `src/ros`，构建产物放 `output/ros`，不在仓库根目录运行 colcon：
 
-## 2026-10-08 验收
+```bash
+rosdep update
+colcon --log-base output/ros/log build \
+  --base-paths src/ros \
+  --build-base output/ros/build \
+  --install-base output/ros/install
+source output/ros/install/setup.bash
+```
 
-通用镜像实际构建完成；dev UID/GID=1000；uv0.12.23 使用系统 Python3.12.3 按原锁安装本地包与开发依赖。普通 GCC/C++20、Clang20/libc++ C++26 实际编译并运行成功；GDB 命中加法断点，读到0.25/0.5，程序正常退出。CMake 两种模式配置通过，Ruff 通过。
+镜像已初始化 rosdep 系统源，`rosdep update` 只更新个人索引。新增系统依赖写入 `docker/Dockerfile.dev` 与包的 `package.xml` 后重建镜像。
 
-容器停止、移除后重新创建，Python 包/开发依赖和构建卷标记仍存在，证明卷持久化。验收后开发容器停止，卷和镜像保留供使用。本轮没有打开 VS Code 容器窗口，也没有安装或验收数据库、消息队列、ROS/Isaac 容器。测试源码只在已移除容器的 /tmp 中，没有提交进仓库。
+## 5. RL 训练与模型服务
+
+`sim` 按 Arena 锁文件提供 Gymnasium、pandas、PyTorch / CUDA 与 RSL-RL。默认训练入口是 32 个 Cartpole 环境、2 次迭代，用于确认链路；自定义参数会替换默认参数：
+
+```bash
+./scripts/lab train
+./scripts/lab train --task Isaac-Cartpole-v0 --num_envs 128 \
+  --max_iterations 100 --headless --viz none physics=physx
+```
+
+训练工作目录是 `/runs/rl`，上游写入相对路径 `logs/`，因此结果在主机 `output/runs/rl/logs/`。正式实验需固定任务、种子、训练参数与模型版本。
+
+`policy` 使用 GR00T 要求的 Python 3.10 与独立的 Torch / CUDA。模型开发用 `./scripts/lab policy-shell`；微调入口 `./scripts/lab policy-train` 无参数时只显示官方帮助，默认产物目录 `/runs/gr00t/train`。权重与数据集不进入镜像，需要时在 `policy` shell 中下载官方固定 revision：
+
+```bash
+hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
+  --revision gn1_6 --local-dir /data/models/arena-g1/checkpoint-20000
+```
+
+然后在两个主机终端分别运行：
+
+```bash
+./scripts/lab policy-server
+```
+
+```bash
+./scripts/lab policy-ping
+./scripts/lab g1-evaluate
+```
+
+默认模型路径 `/data/models/arena-g1/checkpoint-20000`，embodiment `NEW_EMBODIMENT`，端点 `127.0.0.1:5555`，可用 `POLICY_MODEL_PATH`、`POLICY_PORT` 覆盖（默认值在 `experiments/arena_g1/experiment.env`）。不要把身份未确认的已有服务当作兼容服务。G1 评估保留 CPU 物理、官方配置与 `g1_wbc_joint`，与上游说明一致。
+
+仿真与模型共享本机约 12 GB 显存，正式闭环前记录峰值占用；需要时把 `policy` 放到远程 GPU，评估端用 `--remote_host`、`--remote_port` 指向它。`sim`、`policy` 使用 `ipc: host`，满足 dataloader 与分布式训练的共享内存需求。
+
+## 6. 数据、缓存与身份
+
+- 仓库绑定为 `/workspace`，`output/storage` 为 `/data`，`output/runs` 为 `/runs`，三个容器路径一致。容器退出后结果仍在主机的 `output/` 中，可直接查看。
+- `dev` 没有命名卷：学习沙盒依赖在镜像内，C++ 构建目录在 `output/build`，ROS 产物在 `output/ros`。
+- `sim`、`policy` 各有缓存卷；Kit 的 `data`、`cache`、`logs` 另有命名卷，保留窗口布局、着色器缓存与应用日志。CUDA JIT 缓存（`CUDA_CACHE_PATH`）与 Triton 缓存放在各自缓存卷的子目录。
+- 镜像用户的 UID/GID 在构建时由 `.env` 决定；更换身份需要重建镜像，并处理已有卷的权限。
+
+## 7. 镜像发布与拉取
+
+发布端在 `.env` 或命令行指定 registry 前缀与版本，构建后登录 registry 并推送：
+
+```bash
+docker login ghcr.io
+IMAGE_PREFIX=ghcr.io/chanc313/robotics-lab IMAGE_TAG=<版本> ./scripts/lab build
+IMAGE_PREFIX=ghcr.io/chanc313/robotics-lab IMAGE_TAG=<版本> ./scripts/lab publish
+```
+
+已构建的镜像再次 `build` 会完全命中缓存，只是增加 registry 名称的标签。GHCR 新推送的包默认私有。镜像中包含 Isaac Sim 等 NVIDIA 软件，改为公开前先确认相应许可是否允许再分发。
+
+使用端克隆仓库，把相同的 `IMAGE_PREFIX`、`IMAGE_TAG` 写入 `.env`，再执行：
+
+```bash
+./scripts/lab prepare
+./scripts/lab pull
+./scripts/lab check-installation ros
+```
+
+拉取模式不需要在主机安装 ROS、Isaac 或 Torch，也不重新编译上游；权重、数据与许可仍由使用者准备。拉取的镜像用户固定为发布时的 UID/GID（当前为 1000），使用机器需让该身份可读写源码与数据目录，或由发布端提供匹配身份的镜像；不要对整个项目使用 `chmod 777`。镜像 tag 视为不可覆盖的版本，每次发布在下表记录 tag、源码版本与 registry 返回的 digest。
+
+### 发布记录
+
+| 镜像 | 日期 | 源码 | digest |
+|---|---|---|---|
+| `ghcr.io/chanc313/robotics-lab-dev:v0.1.0` | 2026-10-12 | `9b6385e` + 未提交改动 | `sha256:936982f59eeeada9ab39fa9f1800aba47e75a21d1f8f1d3568b225b308939a9c` |
+| `ghcr.io/chanc313/robotics-lab-policy:v0.1.0` | 2026-10-12 | `9b6385e` + 未提交改动 | `sha256:26609907c492809220b0fb228c5b0662bdf3f4ce66981050189a78abd4675183` |
+| `ghcr.io/chanc313/robotics-lab-sim:v0.1.0` | 待推送 | | |
+
+## 依据
+
+- [固定提交的 Arena 安装说明](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/docs/pages/quickstart/installation.rst)：官方 uv 锁文件安装与 Docker 路线，本项目在镜像内用锁文件安装。
+- [Isaac Sim 容器 GUI](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/install_container.html)、[Isaac Lab Docker](https://isaac-sim.github.io/IsaacLab/main/source/deployment/docker.html)：GPU 与 X11 显示。
+- [Fast DDS 2.14 环境变量](https://fast-dds.docs.eprosima.com/en/2.14.x/fastdds/env_vars/env_vars.html)：UDPv4 内置传输。

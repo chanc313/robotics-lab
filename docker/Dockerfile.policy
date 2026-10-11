@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+# check=skip=InvalidDefaultArgInFrom
+# The shared uv image is pinned in compose.yaml (x-build-args); the CUDA base is used only here.
+ARG UV_IMAGE
+FROM ${UV_IMAGE} AS uv
+FROM nvidia/cuda:12.6.3-cudnn-devel-ubuntu24.04@sha256:50efab398f76258daa91ceebb33b6467e40217c67ea44fb5a2cebc6be7d9cce3 AS policy
+ARG DEBIAN_FRONTEND=noninteractive
+ARG LOCAL_UID=1000
+ARG LOCAL_GID=1000
+ENV LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+    UV_PYTHON_INSTALL_DIR=/opt/python \
+    UV_LINK_MODE=copy UV_HTTP_TIMEOUT=180 UV_HTTP_RETRIES=5 UV_CONCURRENT_DOWNLOADS=8 \
+    CUDA_HOME=/usr/local/cuda NVIDIA_DRIVER_CAPABILITIES=compute,utility \
+    MAX_JOBS=2 NVCC_THREADS=2 DS_BUILD_OPS=0 PYTHONUNBUFFERED=1
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates git build-essential ffmpeg libglib2.0-0 libgl1 \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=uv /uv /uvx /usr/local/bin/
+COPY docker/versions.env /tmp/versions.env
+COPY --chmod=755 docker/fetch_arena.sh /tmp/fetch_arena.sh
+# Only GR00T is needed here; isaaclab_arena_gr00t configs and helpers import gr00t alone.
+RUN /tmp/fetch_arena.sh submodules/Isaac-GR00T
+WORKDIR /opt/policy-runtime
+COPY docker/policy/pyproject.toml docker/policy/uv.lock ./
+RUN if id ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
+    && if ! getent group "$LOCAL_GID" >/dev/null; then groupadd --gid "$LOCAL_GID" dev; fi \
+    && useradd --uid "$LOCAL_UID" --gid "$LOCAL_GID" --create-home --shell /bin/bash dev \
+    && mkdir -p /opt/python /opt/policy-venv /workspace /data /home/dev/.cache \
+    && chown -R dev:"$LOCAL_GID" /opt/python /opt/arena /opt/policy-venv /opt/policy-runtime /workspace /data /home/dev
+ARG UV_PROJECT_ENVIRONMENT=/opt/policy-venv
+ARG UV_CACHE_DIR=/tmp/uv-cache
+RUN --mount=type=cache,id=robotics-lab-policy-uv,target=/tmp/uv-cache \
+    chown -R dev:"$LOCAL_GID" /tmp/uv-cache
+USER dev
+RUN --mount=type=cache,id=robotics-lab-policy-uv,target=/tmp/uv-cache \
+    . /tmp/versions.env && uv python install "$POLICY_PYTHON_VERSION" \
+    && uv sync --locked --python "$POLICY_PYTHON_VERSION" \
+    && uv pip install --python /opt/policy-venv/bin/python --no-deps --no-build-isolation \
+       -e /opt/arena/submodules/Isaac-GR00T
+# CUDA extension installation needs the already installed, pinned Torch toolchain.
+RUN --mount=type=cache,id=robotics-lab-policy-uv,target=/tmp/uv-cache \
+    uv pip install --python /opt/policy-venv/bin/python --no-deps --no-build-isolation flash-attn==2.7.4.post1
+ENV PATH=/opt/policy-venv/bin:$PATH
+WORKDIR /opt/arena/submodules/Isaac-GR00T
+CMD ["bash"]

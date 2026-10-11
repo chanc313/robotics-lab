@@ -2,102 +2,41 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Python: sync",
-      "problemMatcher": [],
-      "type": "process",
-      "command": "uv",
-      "args": [
-        "sync",
-        "--locked"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "Python: lint",
-      "problemMatcher": [],
-      "type": "process",
-      "command": "uv",
-      "args": [
-        "run",
-        "--locked",
-        "ruff",
-        "check",
-        "--no-cache",
-        "src/pythonsrc"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "Python: sync",
-      "dependsOrder": "sequence"
-    },
-    {
       "label": "C++: configure",
-      "problemMatcher": [],
-      "type": "process",
-      "command": "cmake",
-      "args": [
-        "--preset",
-        "debug"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
+      "type": "cmake",
+      "command": "configure",
+      "problemMatcher": []
     },
     {
       "label": "C++: build",
+      "type": "cmake",
+      "command": "build",
+      "targets": [
+        "main"
+      ],
+      "dependsOn": "C++: configure",
       "problemMatcher": [
         "$gcc"
       ],
-      "type": "process",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "--preset",
-        "debug"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "C++: configure",
-      "dependsOrder": "sequence",
       "group": {
         "kind": "build",
         "isDefault": true
       }
     },
     {
-      "label": "C++26: configure",
-      "problemMatcher": [],
+      "label": "Python: lint",
       "type": "process",
-      "command": "cmake",
+      "command": "uv",
       "args": [
-        "--preset",
-        "debug-cpp26"
-      ],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      }
-    },
-    {
-      "label": "C++26: build",
-      "problemMatcher": [
-        "$gcc"
-      ],
-      "type": "process",
-      "command": "cmake",
-      "args": [
-        "--build",
-        "--preset",
-        "debug-cpp26"
+        "run",
+        "ruff",
+        "check",
+        "."
       ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
-      "dependsOn": "C++26: configure",
-      "dependsOrder": "sequence"
+      "problemMatcher": []
     }
   ]
 }

@@ -1,0 +1,17 @@
+# Compose / Buildx currently omit external Dockerfiles from Bake's fs.read list.
+# VS Code writes its generated Dockerfile here; this named context grants access
+# only to the current user's Dev Containers build files (not all of /tmp).
+# https://github.com/docker/compose/pull/14286
+services:
+  dev:
+    build:
+      additional_contexts:
+        devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features
+  sim:
+    build:
+      additional_contexts:
+        devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features
+  policy:
+    build:
+      additional_contexts:
+        devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features

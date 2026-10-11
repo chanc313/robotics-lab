@@ -1,0 +1,30 @@
+{
+  "name": "Robotics lab sim (Isaac Sim / Lab / Arena)",
+  "dockerComposeFile": [
+    "../../compose.yaml",
+    "../../compose.gui.yaml",
+    "../compose.devcontainer.yaml"
+  ],
+  "service": "sim",
+  "runServices": [
+    "sim"
+  ],
+  "workspaceFolder": "/workspace",
+  "remoteUser": "dev",
+  "updateRemoteUserUID": false,
+  "shutdownAction": "none",
+  "initializeCommand": "./scripts/lab prepare",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/arena/.venv/bin/python",
+        "cmake.configureOnOpen": false
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy"
+      ]
+    }
+  }
+}

@@ -1,49 +1,65 @@
 # Robotics lab
 
-Linux 上 C++ / Python 软件开发的通用起点。保留构建、依赖、编辑器配置与空源码目录；没有业务代码、安装脚本、测试脚本或业务服务。
+长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS，全部在容器中开发和运行。当前起点是复现 **Isaac Lab-Arena × GR00T N1.6 的 Unitree G1 移动双臂**流程，再在其上优化与迭代。底层控制核心在接入真机时以动态库形式加入，推进顺序见 [路线图](docs/ROADMAP.md)。
+
+## 目录
 
 ```text
-include/robotics_lab/       公共 C++ 头文件
-src/cppsrc/                   C++ 实现
-src/pythonsrc/robotics_lab/    Python 包
-.vscode/                   IDE 开发配置
-CMakeLists.txt             C++ 构建规则
-CMakePresets.json          构建模式
-pyproject.toml / uv.lock    Python 项目与依赖锁
+compose.yaml, compose.gui.yaml   三个服务、共享构建参数、GUI 叠加
+docker/                          三个 Dockerfile、入口脚本、上游固定版本与模型依赖锁
+scripts/lab                      主机上的唯一启动器（构建、发布、各类运行入口）
+src/                             项目开发源码，每个子目录是独立模块
+  ai/                            模型、模仿学习与 RL 算法（policy 容器）
+  ros/                           ROS 2 包与节点，colcon 源码根（dev 容器）
+  simulation/                    Isaac 任务、环境与仿真适配（sim 容器）
+experiments/arena_g1/            当前实验的组合配置
+cppsrc/, pythonsrc/              C++ / Python 学习沙盒，不被 src 模块依赖
+docs/                            指南、学习材料、路线图；archive/ 为历史记录
+output/                          运行产物（Git 忽略）：storage → /data，runs → /runs
 ```
 
-每个保留文件的用途、复用时需要改哪里，以及构建与调试边界，见 [开发骨架指南](docs/DEVELOPMENT.md)。
+`src/` 下的模块各自声明依赖与构建方式，模块之间只通过约定的接口交互，不共用根构建。约定见 [开发指南](docs/DEVELOPMENT.md)。
 
-## 日常入口
+## 容器
+
+| 镜像 | 内容 | 用途 |
+|---|---|---|
+| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz |
+| `sim` | Isaac Sim 6.0.1 / Isaac Lab / Arena 0.3.0（Python 3.12），Isaac 自带 Jazzy bridge | 仿真、GUI、RL 训练、评估、数据转换 |
+| `policy` | GR00T N1.6（Python 3.10、Torch 2.7.1 + CUDA 12.6、FlashAttention） | 模型推理服务、微调、自研模型 |
+
+主机只需要 Linux x86_64、Docker / Compose、NVIDIA 驱动与 NVIDIA Container Toolkit；GUI 另需 X11 与可读的会话 Xauthority。Python 包只通过 Dockerfile 与锁文件进入镜像，不在容器里手工安装。
+
+在 Linux 主机终端进入仓库：
 
 ```bash
-uv sync --locked
-cmake --preset debug
-cmake --build --preset debug
+./scripts/lab prepare         # 创建 output 目录与 .env
+./scripts/lab build           # 构建 dev / sim / policy
+./scripts/lab help            # 全部入口
 ```
 
-VS Code 中 Ctrl+Shift+B 执行 C++ 配置和构建；Tasks: Run Task 提供 Python: sync、Python: lint、C++26: build。Python 解释器选择本项目 .venv/bin/python。
+运行 Isaac 前，本人接受 Isaac Sim 许可后，在 `.env` 取消注释 `OMNI_KIT_ACCEPT_EULA=YES`、`ACCEPT_EULA=Y`。VS Code 用户在 **Dev Containers: Reopen in Container** 中选择 dev、sim 或 policy 配置。
 
-当前没有可执行目标，构建成功只说明空骨架可配置，不会运行程序。新增业务入口后再设置 F5 调试配置。科学计算依赖是可选项：需要时执行 uv sync --locked --extra science；普通项目不必安装 NumPy/Matplotlib。
-
-工作站安装历史单独保存在本机 workstation-config 中，不属于本仓库。新项目无需复制机器历史。
-
-## 通用容器开发
-
-Dockerfile 提供 Ubuntu24.04、GCC/CMake/Ninja/GDB、Clang20/libc++、Python3.12 和 uv0.12.23 的开发工具。Compose 管理开发容器、隔离的 Python 环境和编译产物；容器中使用普通 dev 用户。源码绑定挂载，保存即反映到本机。
+常用入口：
 
 ```bash
-docker compose up -d --build dev
-docker compose exec dev uv sync --locked
-docker compose exec dev bash
+./scripts/lab ros-shell       # ROS / C++ 开发 shell
+./scripts/lab sim-gui         # 持续保留 Arena GUI
+./scripts/lab rviz            # RViz
+./scripts/lab train           # Isaac Lab RL 训练（默认短 Cartpole）
+./scripts/lab policy-server   # GR00T G1 推理服务
+./scripts/lab g1-evaluate     # G1 闭环评估，连接已运行的推理服务
 ```
 
-VS Code 命令面板选择 Dev Containers: Reopen in Container，打开后使用相同的 Ctrl+Shift+B 和 Python 开发配置。容器 .venv 与 output 使用独立命名卷，不混用宿主机对应目录。
+这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [路线图](docs/ROADMAP.md)。
 
-```bash
-docker compose down
-```
+## 文档
 
-停止容器保留卷。更多说明、UID 设置、数据库/消息队列扩展方式见 [容器开发指南](docs/CONTAINERS.md)。原 ROS/Gazebo 专用 Dockerfile 已移除；ROS/Isaac 按未来任务另选专用环境。当前镜像是开发环境，没有生产应用入口。
+- [容器指南](docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
+- [开发指南](docs/DEVELOPMENT.md)：模块约定、依赖规则、接口与测试的时机
+- [路线图](docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
+- [学习沙盒工具链](docs/TOOLCHAIN.md)：`cppsrc/`、`pythonsrc/`
+- 学习材料：[核心理论](docs/CORE_CONCEPTS.md)、[Isaac GUI 与 policy_runner](docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](docs/PROJECT_START.md)
+- [历史记录](docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
 
-仓库沿用 MIT 许可证，见 LICENSE。
+许可证：[LICENSE](LICENSE)。
