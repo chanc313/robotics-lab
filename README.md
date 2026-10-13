@@ -61,7 +61,7 @@ output/                          运行产物（Git 忽略）：storage → /dat
 - [开发指南](docs/DEVELOPMENT.md)：模块约定、依赖规则、接口与测试的时机
 - [路线图](docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
 - [学习沙盒工具链](docs/TOOLCHAIN.md)：`cppsrc/`、`pythonsrc/`、`rossrc/`
-- 学习材料：[核心理论](docs/CORE_CONCEPTS.md)、[ROS 2 入门](docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](docs/PROJECT_START.md)
+- 学习材料：[G1 Demo 学习计划](docs/LEARNING_PLAN.md)、[核心理论](docs/CORE_CONCEPTS.md)、[ROS 2 入门](docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](docs/PROJECT_START.md)
 - [历史记录](docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
 
 许可证：[LICENSE](LICENSE)。
