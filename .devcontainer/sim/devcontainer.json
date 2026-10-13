@@ -13,6 +13,9 @@
   "remoteUser": "dev",
   "updateRemoteUserUID": false,
   "shutdownAction": "none",
+  "otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
   "initializeCommand": "./scripts/lab prepare",
   "customizations": {
     "vscode": {
@@ -23,7 +26,8 @@
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",
-        "ms-python.debugpy"
+        "ms-python.debugpy",
+        "charliermarsh.ruff"
       ]
     }
   }

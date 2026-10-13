@@ -54,7 +54,9 @@ ACCEPT_EULA=Y
 | Robotics lab policy | GR00T 与模型代码 | `/opt/policy-venv/bin/python` |
 
 - 三个配置打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
-- 同时开发多个容器时，每个容器用一个 VS Code 窗口：**File: New Window** 后执行 **Dev Containers: Open Folder in Container...**，选择仓库根目录和另一个配置。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续运行。
+- 日常只需要 dev 窗口：ROS、C++、学习沙盒、文档和 Git 都在这里。编辑或调试依赖 Isaac、GR00T 的代码时再另开窗口（**File: New Window** → **Dev Containers: Open Folder in Container...** → 选择仓库根目录与 sim 或 policy 配置），以获得对应环境的补全和断点调试；只运行仿真、训练或推理服务时不必开窗口，直接在主机执行 `./scripts/lab` 入口。三个窗口看到的是同一份文件，任何一处的修改都会立即出现在其他窗口；Git 操作建议只在 dev 窗口做。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续空转（只占少量内存，不占 GPU），不用时可在主机执行 `docker compose --profile sim --profile policy stop sim policy` 停止。
+- 每个容器只装自己的依赖，Pylance 因此只诊断已打开的文件：在 sim 窗口打开 `rossrc/` 这类属于 dev 的代码，出现无法解析的导入属于正常现象。所有服务使用主机网络，端口本来就在主机上，三个配置都关闭了 VS Code 的自动端口转发。
+- sim、policy 镜像没有系统 Python，只有镜像内固定的解释器。VS Code 的 Python Environments 扩展可能弹出“No Python found… install Python using uv”，选 **Don't ask again** 即可，不要让它在运行时安装解释器。
 - `dev` 的 `python3` 是带 ROS 依赖的系统 Python，ROS 节点直接用它运行；学习沙盒环境不在 `PATH` 中，终端也不自动激活，见 [学习沙盒工具链](TOOLCHAIN.md)。Pylance 额外加载 ROS 的 Python 包路径。
 - `.vscode/launch.json` 为学习沙盒、ROS、Isaac、GR00T 各提供“当前文件”调试配置，选与当前容器相符的一项。
 - `sim` 配置加载 GUI 叠加文件，要求 VS Code 进程拿到当前的 `DISPLAY`、`XAUTHORITY` 并能读取会话 cookie；必要时从 Linux 桌面终端启动 VS Code。`dev` 配置不申请 GPU 和显示，需要 RViz 时用 `./scripts/lab rviz`。

@@ -12,6 +12,9 @@
   "remoteUser": "dev",
   "updateRemoteUserUID": false,
   "shutdownAction": "none",
+  "otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
   "initializeCommand": "./scripts/lab prepare",
   "customizations": {
     "vscode": {
