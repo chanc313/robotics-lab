@@ -131,6 +131,8 @@ hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
   --revision gn1_6 --local-dir /data/models/arena-g1/checkpoint-20000
 ```
 
+这是上游的官方命令，会下载整个仓库（约 50 GB），其中约 44 GB 是续训用的优化器与 DeepSpeed 状态。只做推理时可以加 `--exclude "global_step*/*" optimizer.pt scheduler.pt "rng_state_*.pth" training_args.bin`，只下载约 6.6 GB；之后需要续训时再执行官方命令补齐。
+
 然后在两个主机终端分别运行：
 
 ```bash
@@ -144,7 +146,11 @@ hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
 
 默认模型路径 `/data/models/arena-g1/checkpoint-20000`，embodiment `NEW_EMBODIMENT`，端点 `127.0.0.1:5555`，可用 `POLICY_MODEL_PATH`、`POLICY_PORT` 覆盖（默认值在 `experiments/arena_g1/experiment.env`）。不要把身份未确认的已有服务当作兼容服务。G1 评估保留 CPU 物理、官方配置与 `g1_wbc_joint`，与上游说明一致。
 
-仿真与模型共享本机约 12 GB 显存，正式闭环前记录峰值占用；需要时把 `policy` 放到远程 GPU，评估端用 `--remote_host`、`--remote_port` 指向它。`sim`、`policy` 使用 `ipc: host`，满足 dataloader 与分布式训练的共享内存需求。
+`g1-evaluate` 打开 Kit 窗口运行一个 episode。不需要窗口时，在 `sim` 中运行同一条 `policy_runner.py` 命令并把 `--viz kit` 换成 `--headless`。
+
+本机（RTX 4080 Laptop 12 GB、30 GB 内存）2026-10-13 的实测：GR00T 服务约 30 秒就绪、占显存约 6.2 GB；无界面评估时整机显存峰值约 10.7 GB、内存峰值约 20 GB，一个 episode（最长 1500 步、30 秒仿真时间）墙钟约 12 分钟，首次运行还要从 NVIDIA 资产库下载场景模型。`--record_viewport_video` 会把整段画面留在内存里，录满 1500 步的 episode 时进程涨到约 18 GB 并被系统 OOM 杀掉，在本机录像只适合短运行。
+
+仿真与模型共享本机约 12 GB 显存；需要时把 `policy` 放到远程 GPU，评估端用 `--remote_host`、`--remote_port` 指向它。`sim`、`policy` 使用 `ipc: host`，满足 dataloader 与分布式训练的共享内存需求。
 
 ## 6. 数据、缓存与身份
 

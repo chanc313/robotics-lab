@@ -12,7 +12,7 @@
 | 目录与工具链 | 删除 control 容器配置、interfaces 占位与 AI 空目录的 Ruff 预设；libc++ 限定到原有学习目标 main，不再通过环境变量影响所有 C++ 构建 |
 | 静态复核 | 三服务 Compose / GUI / IDE 配置、JSON、Bash / Python 语法、文档链接与 diff 空白检查通过；开发镜像没有全局 CXXFLAGS，也没有挂入 Isaac 环境 |
 
-本轮日志与三个镜像标识在 `output/acceptance/2026-10-11/container-simplification/`。仅验证安装与 GUI，无完整通信、控制或训练闭环测试；旧 control / gui 镜像标签已移除。
+本轮日志与三个镜像标识在 `output/runs/setup/2026-10-11/container-simplification/`。仅验证安装与 GUI，无完整通信、控制或训练闭环测试；旧 control / gui 镜像标签已移除。
 
 后续按用户删除决定移除了预构建镜像覆盖文件的全部 IDE 引用；当前三份开发配置直接使用 `compose.yaml`，不再禁用 IDE 镜像构建。以下历史记录中的“取消 IDE 自动构建”不适用于当前配置。
 
@@ -57,7 +57,7 @@
 
 检查入口：`scripts/lab check-installation ros|control|sim|policy`。它只检查工具版本、依赖导入、CUDA 小张量 / FlashAttention 算子、空 Kit 启动；不加载模型权重、不创建 ROS 图或训练环境。
 
-日志放本仓库 `output/acceptance/2026-10-11/container-migration/`，不进入 Git。迁移前主机检查只保留在 [历史记录](ENVIRONMENT_CHECK_2026-10-11.md)，不作为容器安装证明。
+日志放本仓库 `output/runs/setup/2026-10-11/container-migration/`，不进入 Git。迁移前主机检查只保留在 [历史记录](ENVIRONMENT_CHECK_2026-10-11.md)，不作为容器安装证明。
 
 ## 仿真依赖的上游例外
 

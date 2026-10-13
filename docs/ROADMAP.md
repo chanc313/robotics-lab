@@ -6,7 +6,7 @@
 
 三个镜像与启动入口已就绪：`dev`（ROS 2 Jazzy、RViz、C++）、`sim`（Isaac Sim / Lab / Arena）、`policy`（GR00T N1.6）。`src/ai`、`src/ros`、`src/simulation` 目前只有职责说明，没有自研代码。
 
-能运行的闭环只有上游 Arena × GR00T 回路，G1 权重尚未下载，闭环评估尚未运行：
+能运行的闭环只有上游 Arena × GR00T 回路。官方 G1 权重已下载，2026-10-13 首次跑通闭环评估：两个无界面 episode 中一个在第 979 步成功放置，一个抬起盒子但 1500 步内未放入箱子（运行记录在 `output/runs/arena-g1/`）。样本太少，还不能作为成功率结论：
 
 ```mermaid
 flowchart LR

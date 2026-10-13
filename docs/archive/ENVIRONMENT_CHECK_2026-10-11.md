@@ -30,10 +30,10 @@
 OMNI_KIT_ACCEPT_EULA=YES ACCEPT_EULA=Y ./.venv/bin/python isaaclab_arena/evaluation/policy_runner.py --viz kit --policy_type zero_action --num_steps 200 --output_base_dir /tmp/robotics-lab-gui-check-2026-10-11 cube_goal_pose
 ```
 
-完整日志与报告已从临时目录归档到本仓库忽略的 `output/acceptance/2026-10-11/`：
+完整日志与报告已从临时目录归档到本仓库忽略的 `output/runs/setup/2026-10-11/`：
 
-- [完整 GUI 日志](/home/channing/projects/robotics-lab/output/acceptance/2026-10-11/arena-gui-200.log)
-- [HTML 报告](/home/channing/projects/robotics-lab/output/acceptance/2026-10-11/arena-gui-200/2026-10-11_14-59-01/index.html)
+- [完整 GUI 日志](/home/channing/projects/robotics-lab/output/runs/setup/2026-10-11/arena-gui-200.log)
+- [HTML 报告](/home/channing/projects/robotics-lab/output/runs/setup/2026-10-11/arena-gui-200/2026-10-11_14-59-01/index.html)
 
 Kit 初始化约 92 秒，200 个控制步约 33 秒；本次完成 episode 数为 0。空样本的 `object_moved_rate=NaN` 不用于判断任务能力。
 
@@ -51,7 +51,7 @@ Kit 初始化约 92 秒，200 个控制步约 33 秒；本次完成 episode 数�
 
 日志：
 
-- [容器示例通信](/home/channing/projects/robotics-lab/output/acceptance/2026-10-11/ros-container/container-demo.log)
-- [主机订阅者](/home/channing/projects/robotics-lab/output/acceptance/2026-10-11/ros-container/host-listener.log)
+- [容器示例通信](/home/channing/projects/robotics-lab/output/runs/setup/2026-10-11/ros-container/container-demo.log)
+- [主机订阅者](/home/channing/projects/robotics-lab/output/runs/setup/2026-10-11/ros-container/host-listener.log)
 
 此次验证覆盖 ROS 基础环境与消息通信，尚未新增自有 ROS 包或复核容器节点到 Isaac 桥接的链路。用户当前已运行的旧 Dev Container 未被停止或重建；需在 VS Code 执行 `Dev Containers: Rebuild Container` 应用新镜像。
