@@ -12,7 +12,7 @@
 | `sim` | Isaac Sim 物理与渲染、Isaac Lab 环境、RSL-RL 强化学习训练、Arena 任务评估、数据生成与转换 | 运行 G1 移动操作任务，作为 GR00T 推理服务的客户端执行闭环评估 |
 | `policy` | GR00T N1.6 推理服务、模型微调与训练、自研模型开发 | 加载官方 G1 微调权重，为 sim 提供动作块 |
 
-各容器的镜像内容与功能清单见 [容器指南](ws/docs/CONTAINERS.md#三个容器)。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
+每个容器都有自己的 README（`.devcontainer/<容器>/README.md`，在该容器里显示为 `/workspace/README.md`），写明镜像内容、闭环功能与自检命令、单独复用时需要带走的文件；概览见 [容器指南](ws/docs/CONTAINERS.md#三个容器)。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
 
 ## 目录
 

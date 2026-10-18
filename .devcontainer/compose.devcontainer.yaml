@@ -1,7 +1,8 @@
 # IDE-only additions for the three Dev Container configurations.
 #
 # Each container gets its own VS Code workspace settings, tasks and launch configs,
-# mounted as /workspace/.vscode (paths resolve from the repository root).
+# mounted as /workspace/.vscode, and its own README as /workspace/README.md
+# (paths resolve from the repository root).
 #
 # Compose / Buildx currently omit external Dockerfiles from Bake's fs.read list.
 # VS Code writes its generated Dockerfile under devcontainer_files; this named context
@@ -14,15 +15,18 @@ services:
         devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features
     volumes:
       - ./.devcontainer/dev/vscode:/workspace/.vscode
+      - ./.devcontainer/dev/README.md:/workspace/README.md:ro
   sim:
     build:
       additional_contexts:
         devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features
     volumes:
       - ./.devcontainer/sim/vscode:/workspace/.vscode
+      - ./.devcontainer/sim/README.md:/workspace/README.md:ro
   policy:
     build:
       additional_contexts:
         devcontainer_files: ${TMPDIR:-/tmp}/devcontainercli-${USER:?Dev Containers requires the host USER variable}/container-features
     volumes:
       - ./.devcontainer/policy/vscode:/workspace/.vscode
+      - ./.devcontainer/policy/README.md:/workspace/README.md:ro
