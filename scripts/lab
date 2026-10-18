@@ -107,6 +107,12 @@ case "$command" in
         fi
         exec "${compose[@]}" run --rm --no-deps sim python isaaclab_arena/evaluation/policy_runner.py "$@"
         ;;
+    dev-gui)
+        prepare
+        gui_compose
+        if [[ $# -eq 0 ]]; then set -- bash; fi
+        exec "${compose[@]}" run --rm --no-deps dev "$@"
+        ;;
     rviz)
         prepare
         gui_compose
@@ -180,6 +186,7 @@ Run from the Linux host terminal in this repository:
   scripts/lab tutorial basic   Open the Isaac cube tutorial
   scripts/lab tutorial ik      Open the Franka IK tutorial
   scripts/lab evaluate [args]  Evaluate one zero-action episode with GUI by default
+  scripts/lab dev-gui [cmd]    ROS development shell or command with display and GPU (MuJoCo viewer, rqt)
   scripts/lab rviz             Run RViz from the ROS development image
   scripts/lab train [args]     Run RL training (a short Cartpole run by default)
   scripts/lab policy-shell     Open the GR00T development shell

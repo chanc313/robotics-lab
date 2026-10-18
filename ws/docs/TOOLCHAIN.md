@@ -1,6 +1,6 @@
 # 学习沙盒工具链
 
-`cppsrc/`、`pythonsrc/`、`rossrc/` 是独立的 C++、Python、ROS 2 学习沙盒，`src/` 下的项目模块不依赖它们。三者都在 `dev` 容器中构建和运行（VS Code 的 dev 配置，或 `./scripts/lab ros-shell`），位于 `/workspace` 下；构建产物统一放在 `/build`（主机 `output/build`），不会出现在工作区里。
+`cppsrc/`、`pythonsrc/`、`rossrc/` 是独立的 C++、Python、ROS 2 学习沙盒，`src/` 下的项目模块不依赖它们；`dev` 镜像另外预装了 ros2_control 与 MuJoCo，供控制方向的学习使用。三者都在 `dev` 容器中构建和运行（VS Code 的 dev 配置，或 `./scripts/lab ros-shell`），位于 `/workspace` 下；构建产物统一放在 `/build`（主机 `output/build`），不会出现在工作区里。
 
 ## C++：`cppsrc/`
 
@@ -30,7 +30,7 @@ VS Code：
 
 ## Python：`pythonsrc/`
 
-`pythonsrc/` 是独立的 uv 项目（扁平布局，包名 `robotics_lab`），要求 Python ≥ 3.12。它的依赖（Ruff、debugpy、ipykernel，以及 `science` 可选组的 numpy、matplotlib）在构建 `dev` 镜像时安装到 `/opt/learning-venv`；源码通过 `.pth` 直接从 `/workspace/pythonsrc` 导入，修改即时生效。
+`pythonsrc/` 是独立的 uv 项目（扁平布局，包名 `robotics_lab`），要求 Python ≥ 3.12。它的依赖（Ruff、debugpy、ipykernel，`science` 可选组的 numpy、matplotlib，以及 `mujoco` 可选组的 MuJoCo 3.12.0）在构建 `dev` 镜像时安装到 `/opt/learning-venv`；源码通过 `.pth` 直接从 `/workspace/pythonsrc` 导入，修改即时生效。
 
 ```bash
 uv run python -m robotics_lab
@@ -67,3 +67,29 @@ ros2 launch hello_py hello.launch.py                   # 持续运行，Ctrl+C �
 也可以在两个终端分别运行 `ros2 run hello_cpp talker`、`ros2 run hello_py listener`，再用 `ros2 node list`、`ros2 topic info /hello`、`ros2 topic echo /hello` 观察。VS Code 任务 `ROS sandbox: build` 与 `ROS sandbox: self-check` 执行同样的命令；默认 Dev Container 为 C/C++ 扩展加入了 `/opt/ros/jazzy/include`，ROS 头文件可以被识别。
 
 这里只验证 `dev` 容器内的 ROS 通信；与 `sim`、`policy` 的连接属于路线图后续步骤。项目自己的 ROS 包放 `src/ros`，构建到 `/build/ros`。
+
+## ros2_control 与 MuJoCo
+
+`dev` 镜像预装 ros2_control、ros2_controllers，以及把 MuJoCo 作为 ros2_control 硬件接口的 `mujoco_ros2_control` 和它的示例包 `mujoco_ros2_control_demos`。MuJoCo 引擎版本是 3.12.0，学习环境里的 MuJoCo Python 绑定固定为同一版本，两边加载的模型行为一致。项目回路目前不使用它们。
+
+先跑通官方第一个示例（不开窗口），再用 `ros2 control` 命令观察控制器与硬件接口：
+
+```bash
+ros2 launch mujoco_ros2_control_demos 01_basic_robot.launch.py headless:=true
+```
+
+```bash
+ros2 control list_controllers            # 另开终端：4 个控制器应为 active
+ros2 control list_hardware_components    # MujocoSystem，读写频率 100 Hz
+ros2 topic echo /joint_states --once
+```
+
+去掉 `headless:=true` 会打开 MuJoCo 窗口；VS Code 的 dev 窗口已带显示，不用 IDE 时用 `./scripts/lab dev-gui` 进入带显示的 shell。示例目录 `/opt/ros/jazzy/share/mujoco_ros2_control_demos/launch/` 里还有 PID 控制、传动、底盘速度插件等后续示例。
+
+单独用 MuJoCo Python 时，经由学习环境运行，例如打开交互查看器：
+
+```bash
+uv run python -m mujoco.viewer
+```
+
+容器里没有实时调度权限，`controller_manager` 启动时会提示无法启用 FIFO 实时调度，学习和仿真不受影响；需要实时性时再给 `dev` 加相应的容器权限。

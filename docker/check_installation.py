@@ -10,6 +10,17 @@ import sys
 import traceback
 from pathlib import Path
 
+LEARNING_ENV_CHECK = """
+import matplotlib, mujoco, numpy, robotics_lab, ruff
+
+model = mujoco.MjModel.from_xml_string(
+    "<mujoco><worldbody><body><freejoint/><geom size='0.1'/></body></worldbody></mujoco>"
+)
+data = mujoco.MjData(model)
+mujoco.mj_step(model, data)
+print(robotics_lab.__file__, "mujoco", mujoco.__version__)
+"""
+
 
 def report(key, value):
     print(json.dumps({key: value}, ensure_ascii=False), flush=True)
@@ -41,20 +52,13 @@ def main():
     if scope == "ros":
         for module in ("rclpy", "debugpy"):
             report(module, importlib.import_module(module).__file__)
-        subprocess.run(["ros2", "pkg", "prefix", "demo_nodes_cpp"], check=True)
-        subprocess.run(["ros2", "pkg", "prefix", "rviz2"], check=True)
+        for package in ("demo_nodes_cpp", "rviz2", "controller_manager", "mujoco_ros2_control"):
+            subprocess.run(["ros2", "pkg", "prefix", package], check=True)
         subprocess.run(["rosdep", "--version"], check=True)
         for command in (os.environ["CXX"], "cmake", "ninja", "gdb"):
             subprocess.run([command, "--version"], check=True)
         # Learning sandbox: build-time dependencies plus the bind-mounted source via .pth.
-        subprocess.run(
-            [
-                "/opt/learning-venv/bin/python",
-                "-c",
-                "import robotics_lab, numpy, matplotlib, ruff; print(robotics_lab.__file__)",
-            ],
-            check=True,
-        )
+        subprocess.run(["/opt/learning-venv/bin/python", "-c", LEARNING_ENV_CHECK], check=True)
     else:
         for module in ("numpy", "gymnasium", "pandas"):
             loaded = importlib.import_module(module)

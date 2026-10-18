@@ -4,7 +4,7 @@ ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GP
 
 | 镜像 | 内容 | 用途 |
 |---|---|---|
-| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz |
+| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MuJoCo 3.12（含 mujoco_ros2_control 及示例）、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz、控制与 MuJoCo 学习 |
 | `sim` | Isaac Sim 6.0.1 / Isaac Lab / Arena 0.3.0（Python 3.12），Isaac 自带 Jazzy bridge | 仿真、GUI、RL 训练、评估、数据转换 |
 | `policy` | GR00T N1.6（Python 3.10、Torch 2.7.1 + CUDA 12.6、FlashAttention） | 模型推理服务、微调、自研模型 |
 
@@ -45,7 +45,7 @@ ACCEPT_EULA=Y
 ./scripts/lab check-installation policy
 ```
 
-- `ros`：rclpy、debugpy、ROS 示例包、RViz、rosdep、编译工具，以及学习沙盒环境；
+- `ros`：rclpy、debugpy、ROS 示例包、RViz、controller_manager、mujoco_ros2_control、rosdep、编译工具，以及学习沙盒环境（含 MuJoCo Python 跑一步仿真）；
 - `sim`：Python 依赖、CUDA 小算子、Isaac 自带 Jazzy 库、Isaac / Lab / Arena / RSL-RL 版本、GR00T 客户端源码导入，以及无界面空 Kit 启动；
 - `policy`：Python 依赖、CUDA 小算子、GR00T 与 DeepSpeed 导入、FlashAttention 小算子。
 
@@ -67,7 +67,7 @@ ACCEPT_EULA=Y
 - sim、policy 镜像没有系统 Python，只有镜像内固定的解释器。VS Code 的 Python Environments 扩展可能弹出“No Python found… install Python using uv”，选 **Don't ask again** 即可，不要让它在运行时安装解释器。
 - `dev` 的 `python3` 是带 ROS 依赖的系统 Python，ROS 节点直接用它运行；学习沙盒环境不在 `PATH` 中，终端也不自动激活，见 [学习沙盒工具链](TOOLCHAIN.md)。Pylance 额外加载 ROS 的 Python 包路径。
 - 各容器的 `launch.json` 只包含本容器的调试配置：dev 有 C++、学习沙盒与 ROS 节点，sim 有 Isaac 当前文件，policy 有 GR00T 当前文件。Ruff 规则在 `.devcontainer/ruff/ruff.toml`，只读挂载为 `/opt/ruff/ruff.toml`，编辑器通过 `ruff.configuration` 读取，命令行用 `ruff check --config /opt/ruff/ruff.toml`；Ruff 缓存写在容器内部，不回到主机。
-- `sim` 配置加载 GUI 叠加文件，要求 VS Code 进程拿到当前的 `DISPLAY`、`XAUTHORITY` 并能读取会话 cookie；必要时从 Linux 桌面终端启动 VS Code。`dev` 配置不申请 GPU 和显示，需要 RViz 时用 `./scripts/lab rviz`。
+- `dev`、`sim` 配置都加载 GUI 叠加文件（显示与 GPU），在容器终端里可以直接打开 RViz、MuJoCo、Isaac 窗口；这要求 VS Code 进程拿到当前的 `DISPLAY`、`XAUTHORITY` 并能读取会话 cookie，必要时从 Linux 桌面终端启动 VS Code。不用 IDE 时，主机上的 `./scripts/lab dev-gui`、`./scripts/lab rviz`、`./scripts/lab sim-gui` 提供同样的窗口。
 - IDE 打开容器时可能触发镜像构建；Docker Compose 需 ≥ 2.30 以支持 [`gpus` 配置](https://docs.docker.com/reference/compose-file/services/#gpus)。
 
 ## 3. 启动与停止

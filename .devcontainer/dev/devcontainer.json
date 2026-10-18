@@ -2,6 +2,7 @@
   "name": "Robotics lab dev (ROS 2 Jazzy / C++ / learning)",
   "dockerComposeFile": [
     "../../compose.yaml",
+    "../../compose.gui.yaml",
     "../compose.devcontainer.yaml"
   ],
   "service": "dev",

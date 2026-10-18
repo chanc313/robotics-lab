@@ -38,6 +38,14 @@ RUN . /etc/os-release && test "${VERSION_CODENAME}" = noble \
     && rm -rf /var/lib/apt/lists/* \
     && rosdep init
 
+# Control stack for the personal learning track, installed ahead of project use:
+# ros2_control, the standard controllers, and the MuJoCo hardware plugin with its demos
+# (mujoco_vendor ships MuJoCo 3.12.0; the learning env pins the matching Python bindings).
+RUN apt-get update && apt-get install -y --no-install-recommends \
+       ros-jazzy-ros2-control ros-jazzy-ros2-controllers \
+       ros-jazzy-mujoco-ros2-control ros-jazzy-mujoco-ros2-control-demos \
+    && rm -rf /var/lib/apt/lists/*
+
 # Reuse an existing group when the requested GID is already allocated.
 RUN if id ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
     && if ! getent group "${LOCAL_GID}" >/dev/null; then groupadd --gid "${LOCAL_GID}" dev; fi \
