@@ -1,4 +1,6 @@
 # Fixed project name keeps container and volume names stable for any clone directory.
+# Each service mounts only its own part of ws/ under /workspace; the repository root
+# (Git, Dockerfiles, compose, licence) stays on the host.
 name: robotics-lab
 
 # Shared base images, pinned by digest in one place. LOCAL_UID / LOCAL_GID come from .env.
@@ -30,7 +32,13 @@ services:
     working_dir: /workspace
     command: ["sleep", "infinity"]
     volumes:
-      - .:/workspace
+      - ./ws/docs:/workspace/docs
+      - ./ws/src/ros:/workspace/src/ros
+      - ./ws/cppsrc:/workspace/cppsrc
+      - ./ws/pythonsrc:/workspace/pythonsrc
+      - ./ws/rossrc:/workspace/rossrc
+      - ./.devcontainer/ruff:/opt/ruff:ro
+      - ./output/build:/build
       - ./output/storage:/data
       - ./output/runs:/runs
 
@@ -55,7 +63,10 @@ services:
       CUDA_CACHE_PATH: /home/dev/.cache/nv/ComputeCache
     command: ["sleep", "infinity"]
     volumes:
-      - .:/workspace
+      - ./ws/docs:/workspace/docs
+      - ./ws/src/simulation:/workspace/src/simulation
+      - ./ws/experiments:/workspace/experiments
+      - ./.devcontainer/ruff:/opt/ruff:ro
       - ./output/storage:/data
       - ./output/runs:/runs
       - sim-cache:/home/dev/.cache
@@ -84,7 +95,10 @@ services:
       NO_ALBUMENTATIONS_UPDATE: "1"
     command: ["sleep", "infinity"]
     volumes:
-      - .:/workspace
+      - ./ws/docs:/workspace/docs
+      - ./ws/src/ai:/workspace/src/ai
+      - ./ws/experiments:/workspace/experiments
+      - ./.devcontainer/ruff:/opt/ruff:ro
       - ./output/storage:/data
       - ./output/runs:/runs
       - policy-cache:/home/dev/.cache

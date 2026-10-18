@@ -18,10 +18,6 @@
   "initializeCommand": "./scripts/lab prepare",
   "customizations": {
     "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/opt/policy-venv/bin/python",
-        "cmake.configureOnOpen": false
-      },
       "extensions": [
         "ms-python.python",
         "ms-python.vscode-pylance",

@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "GR00T: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/opt/policy-venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "/opt/arena/submodules/Isaac-GR00T"
+    }
+  ]
+}

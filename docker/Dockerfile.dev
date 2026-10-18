@@ -42,9 +42,9 @@ RUN . /etc/os-release && test "${VERSION_CODENAME}" = noble \
 RUN if id ubuntu >/dev/null 2>&1; then userdel -r ubuntu; fi \
     && if ! getent group "${LOCAL_GID}" >/dev/null; then groupadd --gid "${LOCAL_GID}" dev; fi \
     && useradd --uid "${LOCAL_UID}" --gid "${LOCAL_GID}" --create-home --shell /bin/bash dev \
-    && mkdir -p /workspace /opt/learning /opt/learning-venv \
+    && mkdir -p /workspace /build /opt/learning /opt/learning-venv \
     && printf '%s\n' 'source /opt/ros/jazzy/setup.bash' >> /home/dev/.bashrc \
-    && chown dev:"${LOCAL_GID}" /workspace /opt/learning /opt/learning-venv
+    && chown dev:"${LOCAL_GID}" /workspace /build /opt/learning /opt/learning-venv
 
 COPY --chmod=755 docker/ros_entrypoint.sh /usr/local/bin/ros_entrypoint.sh
 
@@ -55,7 +55,7 @@ ENV UV_PROJECT_ENVIRONMENT=/opt/learning-venv \
     UV_PYTHON_DOWNLOADS=never \
     UV_LINK_MODE=copy
 USER dev
-COPY --chown=dev pythonsrc/pyproject.toml pythonsrc/uv.lock /opt/learning/
+COPY --chown=dev ws/pythonsrc/pyproject.toml ws/pythonsrc/uv.lock /opt/learning/
 RUN uv sync --project /opt/learning --locked --all-extras --no-install-project --no-cache \
     && site_packages=$(/opt/learning-venv/bin/python -c 'import sysconfig; print(sysconfig.get_path("purelib"))') \
     && printf '%s\n' /workspace/pythonsrc > "$site_packages/robotics_lab_source.pth"

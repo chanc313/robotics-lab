@@ -1,13 +1,15 @@
 {
+  "python.defaultInterpreterPath": "/opt/learning-venv/bin/python",
   "python.terminal.activateEnvironment": false,
   "python.analysis.typeCheckingMode": "basic",
   "python.analysis.diagnosticMode": "openFilesOnly",
+  "python.analysis.extraPaths": [
+    "/opt/ros/jazzy/lib/python3.12/site-packages"
+  ],
   "python.analysis.exclude": [
-    "output/**",
     "**/__pycache__"
   ],
   "terminal.integrated.cwd": "${workspaceFolder}",
-  "cmake.useCMakePresets": "never",
   "[python]": {
     "editor.defaultFormatter": "charliermarsh.ruff",
     "editor.formatOnSave": true,
@@ -16,6 +18,8 @@
       "source.organizeImports.ruff": "explicit"
     }
   },
+  "ruff.configuration": "/opt/ruff/ruff.toml",
+  "ruff.importStrategy": "fromEnvironment",
   "[cpp]": {
     "editor.defaultFormatter": "ms-vscode.cpptools",
     "editor.formatOnSave": true
@@ -23,21 +27,23 @@
   "[json]": {
     "editor.tabSize": 2
   },
-  "files.watcherExclude": {
-    "**/.venv/**": true,
-    "**/build/**": true,
-    "**/output/**": true
+  "files.exclude": {
+    "**/__pycache__": true
   },
   "search.exclude": {
-    "**/.venv": true,
-    "**/build": true,
-    "**/output": true,
     "**/uv.lock": true
   },
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.includePath": [
+    "${workspaceFolder}/**",
+    "/opt/ros/jazzy/include/**"
+  ],
+  "cmake.useCMakePresets": "never",
+  "cmake.configureOnOpen": true,
+  "cmake.sourceDirectory": "/workspace/cppsrc",
+  "cmake.buildDirectory": "/build/cppsrc/${buildType}",
   "cmake.generator": "Ninja",
   "cmake.buildBeforeRun": true,
-  "ruff.importStrategy": "fromEnvironment",
   "cmake.defaultVariants": {
     "buildType": {
       "default": "debug",
@@ -55,6 +61,5 @@
         }
       }
     }
-  },
-  "cmake.sourceDirectory": "/home/channing/projects/robotics-lab/cppsrc"
+  }
 }

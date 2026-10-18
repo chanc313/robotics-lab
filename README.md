@@ -1,24 +1,27 @@
 # Robotics lab
 
-长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS，全部在容器中开发和运行。当前起点是复现 **Isaac Lab-Arena × GR00T N1.6 的 Unitree G1 移动双臂**流程，再在其上优化与迭代。底层控制核心在接入真机时以动态库形式加入，推进顺序见 [路线图](docs/ROADMAP.md)。
+长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS，全部在容器中开发和运行。当前起点是复现 **Isaac Lab-Arena × GR00T N1.6 的 Unitree G1 移动双臂**流程，再在其上优化与迭代。底层控制核心在接入真机时以动态库形式加入，推进顺序见 [路线图](ws/docs/ROADMAP.md)。
 
 ## 目录
 
+仓库分两层：根目录放 Git、编排与基础设施，只在主机上使用；`ws/` 是开发工作区，各容器只挂载其中属于自己的部分。
+
 ```text
-compose.yaml, compose.gui.yaml   三个服务、共享构建参数、GUI 叠加
-docker/                          三个 Dockerfile、入口脚本、上游固定版本与模型依赖锁
+compose.yaml, compose.gui.yaml   三个服务、各容器的挂载、共享构建参数、GUI 叠加
+docker/                          三个 Dockerfile、入口与检查脚本、上游固定版本、模型依赖锁
+.devcontainer/                   三个 VS Code 容器配置、各自的编辑器设置、共享 Ruff 规则
 scripts/lab                      主机上的唯一启动器（构建、发布、各类运行入口）
-src/                             项目开发源码，每个子目录是独立模块
-  ai/                            模型、模仿学习与 RL 算法（policy 容器）
-  ros/                           ROS 2 包与节点，colcon 源码根（dev 容器）
-  simulation/                    Isaac 任务、环境与仿真适配（sim 容器）
-experiments/arena_g1/            当前实验的组合配置
-cppsrc/, pythonsrc/, rossrc/     C++ / Python / ROS 2 学习沙盒，不被 src 模块依赖
-docs/                            指南、学习材料、路线图；archive/ 为历史记录
-output/                          运行产物（Git 忽略）：storage → /data，runs → /runs
+output/                          运行产物（Git 忽略）：build → /build，runs → /runs，storage → /data
+ws/                              开发工作区
+  docs/                          指南、学习材料、路线图（三个容器都挂载）
+  src/ai/                        模型、模仿学习与 RL 算法（policy）
+  src/ros/                       ROS 2 包与节点（dev）
+  src/simulation/                Isaac 任务、环境与仿真适配（sim）
+  experiments/                   实验组合配置（sim、policy）
+  cppsrc/, pythonsrc/, rossrc/   C++ / Python / ROS 2 学习沙盒（dev）
 ```
 
-`src/` 下的模块各自声明依赖与构建方式，模块之间只通过约定的接口交互，不共用根构建。约定见 [开发指南](docs/DEVELOPMENT.md)。
+容器里的 `/workspace` 只有该容器用到的目录，跨容器的协作由编排器负责；Git 操作在主机上进行。模块约定与挂载规则见 [开发指南](ws/docs/DEVELOPMENT.md)。
 
 ## 容器
 
@@ -53,15 +56,15 @@ output/                          运行产物（Git 忽略）：storage → /dat
 ./scripts/lab g1-evaluate     # G1 闭环评估，连接已运行的推理服务
 ```
 
-这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [路线图](docs/ROADMAP.md)。
+这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [路线图](ws/docs/ROADMAP.md)。
 
 ## 文档
 
-- [容器指南](docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
-- [开发指南](docs/DEVELOPMENT.md)：模块约定、依赖规则、接口与测试的时机
-- [路线图](docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
-- [学习沙盒工具链](docs/TOOLCHAIN.md)：`cppsrc/`、`pythonsrc/`、`rossrc/`
-- 学习材料：[G1 Demo 学习计划](docs/LEARNING_PLAN.md)、[核心理论](docs/CORE_CONCEPTS.md)、[ROS 2 入门](docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](docs/PROJECT_START.md)
-- [历史记录](docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
+- [容器指南](ws/docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
+- [开发指南](ws/docs/DEVELOPMENT.md)：模块约定、依赖规则、接口与测试的时机
+- [路线图](ws/docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
+- [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：`cppsrc/`、`pythonsrc/`、`rossrc/`
+- 学习材料：[G1 Demo 学习计划](ws/docs/LEARNING_PLAN.md)、[核心理论](ws/docs/CORE_CONCEPTS.md)、[ROS 2 入门](ws/docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](ws/docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](ws/docs/PROJECT_START.md)
+- [历史记录](ws/docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
 
 许可证：[LICENSE](LICENSE)。

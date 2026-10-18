@@ -3,9 +3,9 @@
   "tasks": [
     {
       "label": "C++: build (Debug)",
-      "detail": "Configure and build cppsrc into output/build/Debug",
+      "detail": "Configure and build cppsrc into /build/cppsrc/Debug",
       "type": "shell",
-      "command": "cmake -S cppsrc -B output/build/Debug -G Ninja -DCMAKE_BUILD_TYPE=Debug && cmake --build output/build/Debug --target main",
+      "command": "cmake -S cppsrc -B /build/cppsrc/Debug -G Ninja -DCMAKE_BUILD_TYPE=Debug && cmake --build /build/cppsrc/Debug --target main",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -19,9 +19,9 @@
     },
     {
       "label": "C++: build (Release)",
-      "detail": "Configure and build cppsrc into output/build/Release",
+      "detail": "Configure and build cppsrc into /build/cppsrc/Release",
       "type": "shell",
-      "command": "cmake -S cppsrc -B output/build/Release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build output/build/Release --target main",
+      "command": "cmake -S cppsrc -B /build/cppsrc/Release -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build /build/cppsrc/Release --target main",
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -32,9 +32,9 @@
     },
     {
       "label": "ROS sandbox: build",
-      "detail": "colcon build rossrc into output/rossrc (dev container)",
+      "detail": "colcon build rossrc into /build/rossrc",
       "type": "shell",
-      "command": "source /opt/ros/jazzy/setup.bash && colcon --log-base output/rossrc/log build --base-paths rossrc --build-base output/rossrc/build --install-base output/rossrc/install --symlink-install",
+      "command": "source /opt/ros/jazzy/setup.bash && colcon --log-base /build/rossrc/log build --base-paths rossrc --build-base /build/rossrc/build --install-base /build/rossrc/install --symlink-install",
       "options": {
         "cwd": "${workspaceFolder}",
         "shell": {
@@ -51,7 +51,7 @@
       "label": "ROS sandbox: self-check",
       "detail": "Launch the C++ talker and Python listener; exits after 5 messages",
       "type": "shell",
-      "command": "source output/rossrc/install/setup.bash && ros2 launch hello_py hello.launch.py max_messages:=5",
+      "command": "source /build/rossrc/install/setup.bash && ros2 launch hello_py hello.launch.py max_messages:=5",
       "options": {
         "cwd": "${workspaceFolder}",
         "shell": {
@@ -70,6 +70,8 @@
         "run",
         "ruff",
         "check",
+        "--config",
+        "/opt/ruff/ruff.toml",
         "."
       ],
       "options": {

@@ -15,7 +15,7 @@
 | ROS 2 Jazzy | `dev` 中开发与验证节点，并运行 RViz；官方 GR00T 评估保留客户端/服务端接口 |
 | 数据与产物 | 新权重与数据使用 `output/storage`，日志与报告使用 `output/runs`，绑定到运行容器；Git 保存配置与结果摘要 |
 
-本项目使用 `dev`、`sim`、`policy` 三个镜像；组件职责见 [README](../README.md)。主机原有框架与历史记录保留，新入口不使用主机 ROS / Isaac / 模型环境。
+本项目使用 `dev`、`sim`、`policy` 三个镜像；组件职责见 [容器指南](CONTAINERS.md) 与 [开发指南](DEVELOPMENT.md)。主机原有框架与历史记录保留，新入口不使用主机 ROS / Isaac / 模型环境。
 
 ## 容器启动与日常开发
 
@@ -30,7 +30,7 @@
 ./scripts/lab rviz
 ```
 
-分别运行、结束前一个窗口后再进行下一项。仿真、RViz 和模型均在容器内运行，主机终端只是 Docker 启动入口。源码由本仓库绑定到 `/workspace`，上游源码安装在镜像 `/opt/arena`。
+分别运行、结束前一个窗口后再进行下一项。仿真、RViz 和模型均在容器内运行，主机终端只是 Docker 启动入口。每个容器只把 `ws/` 中自己的目录挂载到 `/workspace`，上游源码安装在镜像 `/opt/arena`。
 
 依赖 Isaac 的源码与断点调试选择 `Robotics lab sim` Dev Container 配置；模型代码选择 `Robotics lab policy`。各环境中的解释器与依赖独立，不混用虚拟环境。
 

@@ -5,7 +5,7 @@
       "name": "C++: main (Debug)",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/output/build/Debug/bin/main",
+      "program": "/build/cppsrc/Debug/bin/main",
       "args": [],
       "cwd": "${workspaceFolder}",
       "externalConsole": false,
@@ -14,7 +14,7 @@
       "preLaunchTask": "C++: build (Debug)"
     },
     {
-      "name": "Python learning: current file (development container)",
+      "name": "Python learning: current file",
       "type": "debugpy",
       "request": "launch",
       "program": "${file}",
@@ -23,31 +23,13 @@
       "cwd": "${workspaceFolder}"
     },
     {
-      "name": "ROS: current Python node (development container)",
+      "name": "ROS: current Python node",
       "type": "debugpy",
       "request": "launch",
       "program": "${file}",
       "python": "/usr/bin/python3",
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}"
-    },
-    {
-      "name": "Isaac: current file (simulation container)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${file}",
-      "python": "/opt/arena/.venv/bin/python",
-      "console": "integratedTerminal",
-      "cwd": "/opt/arena"
-    },
-    {
-      "name": "GR00T: current file (policy container)",
-      "type": "debugpy",
-      "request": "launch",
-      "program": "${file}",
-      "python": "/opt/policy-venv/bin/python",
-      "console": "integratedTerminal",
-      "cwd": "/opt/arena/submodules/Isaac-GR00T"
     }
   ]
 }

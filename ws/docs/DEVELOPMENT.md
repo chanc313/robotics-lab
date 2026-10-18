@@ -1,6 +1,26 @@
 # 开发指南
 
-目录总览见 [README](../README.md)，容器的进入与运行方式见 [容器指南](CONTAINERS.md)，阶段安排见 [路线图](ROADMAP.md)。
+容器的进入与运行方式见 [容器指南](CONTAINERS.md)，阶段安排见 [路线图](ROADMAP.md)。
+
+## 仓库与工作区
+
+仓库分两层：
+
+- **仓库根目录**（只在主机上使用）：`compose*.yaml`、`docker/`、`.devcontainer/`、`scripts/lab`、`.env*`、`LICENSE`、`README.md`，以及运行产物目录 `output/`。Git 只在主机上操作。
+- **`ws/` 开发工作区**：`docs/`、`src/`、`experiments/` 与三个学习沙盒。每个容器只把属于自己的目录挂载到 `/workspace`：
+
+| 容器 | `/workspace` 下的内容 | 其他挂载 |
+|---|---|---|
+| dev | `docs/`、`src/ros/`、`cppsrc/`、`pythonsrc/`、`rossrc/` | `/build`（构建产物）、`/data`、`/runs` |
+| sim | `docs/`、`src/simulation/`、`experiments/` | `/data`、`/runs` |
+| policy | `docs/`、`src/ai/`、`experiments/` | `/data`、`/runs` |
+
+挂载在 `compose.yaml` 里逐个目录声明，各容器之间看不到彼此的代码，协作通过编排器（`compose.yaml` 与 `scripts/lab`）、共享的数据目录和后续定义的接口完成。由此带来两条规则：
+
+- 在容器里只往挂载的目录写文件。直接写在 `/workspace` 根目录或 `/workspace/src/` 下的内容只存在于容器内部，重建容器就会丢失。
+- 新增模块或顶层目录属于目录结构调整，先讨论方案；确定后在主机 `ws/` 下建立目录，并在 `compose.yaml` 中给需要它的容器加上挂载。
+
+每个容器的 VS Code 设置、任务和调试配置放在 `.devcontainer/<容器>/vscode/`，挂载为该容器的 `/workspace/.vscode`；Ruff 规则统一放在 `.devcontainer/ruff/ruff.toml`，只读挂载到三个容器的 `/opt/ruff`。
 
 ## 模块约定
 
@@ -9,7 +29,7 @@
 | 模块 | 职责 | 容器与构建 |
 |---|---|---|
 | `src/ai` | 模型结构、推理、模仿学习与 RL 算法、训练配方 | `policy`；新模型需要不同环境时另建镜像 |
-| `src/ros` | ROS 2 包、节点、编排、消息适配 | `dev`；colcon 源码根，产物放 `output/ros` |
+| `src/ros` | ROS 2 包、节点、编排、消息适配 | `dev`；colcon 源码根，产物放 `/build/ros` |
 | `src/simulation` | Isaac 任务与场景、传感器、奖励与结束条件、Gymnasium 环境、仿真适配 | `sim` |
 
 - 模块之间不导入彼此的内部实现。AI 不导入 ROS 或 Isaac 运行时；ROS 适配器只做消息转换与调用；仿真场景不依赖特定模型的内部代码。
@@ -27,7 +47,7 @@
 | `sim` | 上游 Arena 的 `uv.lock`（固定提交，`--frozen`），少量补充包写在 `docker/Dockerfile.sim` | `/opt/arena/.venv` |
 | `policy` | `docker/policy/pyproject.toml` 与 `uv.lock` | `/opt/policy-venv` |
 | `dev`（ROS） | apt 包写在 `docker/Dockerfile.dev`，ROS 包的系统依赖同时写进各包的 `package.xml` | 系统 Python `/usr/bin/python3` |
-| `dev`（学习沙盒） | `pythonsrc/pyproject.toml` 与 `uv.lock` | `/opt/learning-venv` |
+| `dev`（学习沙盒） | `ws/pythonsrc/pyproject.toml` 与 `uv.lock` | `/opt/learning-venv` |
 
 自有模块的源码在运行时绑定挂载，不安装进环境。需要让某个环境导入 `src/` 下的 Python 模块时，在对应 Dockerfile 中向该环境写入一个指向 `/workspace/src/<模块>` 的 `.pth` 文件（`dev` 的学习沙盒就是这样接入 `/workspace/pythonsrc` 的）；源码修改即时生效，依赖变化才需要重建。
 
@@ -43,4 +63,4 @@ ROS C++ 使用 Clang 20 的默认 libstdc++，与 Ubuntu 的 ROS 二进制包一
 
 ## 数据与提交
 
-运行结果和数据放 `output/`（Git 忽略），不提交模型、数据集、缓存或凭据。根目录 `.env` 被忽略，`.env.example` 只是样例。
+运行结果和数据放主机的 `output/`（Git 忽略，容器里对应 `/build`、`/runs`、`/data`），不提交模型、数据集、缓存或凭据。根目录 `.env` 被忽略，`.env.example` 只是样例。

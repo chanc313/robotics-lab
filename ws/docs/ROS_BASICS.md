@@ -65,7 +65,7 @@ class Listener(Node):
         self.done = Future()
         self.create_subscription(String, "hello", self.on_message, 10)
 
-    def on_message(self, message: String) -> None:   # 每收到一条消息调用一次
+    def on_message(self, message: String) -> None:  # 每收到一条消息调用一次
         self.received += 1
         self.get_logger().info(f"heard: {message.data}")
         if self.max_messages and self.received >= self.max_messages:
@@ -91,7 +91,7 @@ ROS 代码以**包 package** 为单位组织，每个包有 `package.xml` 声明
 | 构建类型 | `ament_cmake`，用 `CMakeLists.txt` 编译并 `install` 可执行文件 | `ament_python`，用 `setup.py` 注册入口 `listener` |
 | 额外文件 | — | `setup.cfg` 指定可执行文件安装到 `lib/hello_py`；`resource/hello_py` 是让 ROS 找到这个包的标记文件 |
 
-`rossrc/` 是**工作区**的源码根。`colcon build` 逐个构建包，产物装进 `output/rossrc/install`。`source output/rossrc/install/setup.bash` 把这些包加入当前 shell 的环境，之后 `ros2 run hello_cpp talker` 才能找到它们。系统自带的 ROS 包在 `/opt/ros/jazzy`，自己的工作区叠加在它上面，称为 **overlay**。
+`rossrc/` 是**工作区**的源码根。`colcon build` 逐个构建包，产物装进 `/build/rossrc/install`。`source /build/rossrc/install/setup.bash` 把这些包加入当前 shell 的环境，之后 `ros2 run hello_cpp talker` 才能找到它们。系统自带的 ROS 包在 `/opt/ros/jazzy`，自己的工作区叠加在它上面，称为 **overlay**。
 
 完整流程：**写代码 → colcon build → source install/setup.bash → ros2 run / ros2 launch**。改了 C++ 要重新 build；Python 和 launch 文件因为用了 `--symlink-install`，改完直接重新运行即可。
 

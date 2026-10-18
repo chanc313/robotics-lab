@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Isaac: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "python": "/opt/arena/.venv/bin/python",
+      "console": "integratedTerminal",
+      "cwd": "/opt/arena"
+    }
+  ]
+}

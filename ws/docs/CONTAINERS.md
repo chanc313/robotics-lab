@@ -1,6 +1,14 @@
 # 容器指南
 
-ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GPU 驱动、显示和文件存储，主机原生的 ROS、Isaac、模型 Python 环境不参与项目。镜像分工见 [README](../README.md)。下文的 `./scripts/lab` 命令都在 **Linux 主机终端**、仓库根目录执行，它们启动对应容器并在其中运行程序。
+ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GPU 驱动、显示和文件存储，主机原生的 ROS、Isaac、模型 Python 环境不参与项目。下文的 `./scripts/lab` 命令都在 **Linux 主机终端**、仓库根目录执行，它们启动对应容器并在其中运行程序。
+
+| 镜像 | 内容 | 用途 |
+|---|---|---|
+| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz |
+| `sim` | Isaac Sim 6.0.1 / Isaac Lab / Arena 0.3.0（Python 3.12），Isaac 自带 Jazzy bridge | 仿真、GUI、RL 训练、评估、数据转换 |
+| `policy` | GR00T N1.6（Python 3.10、Torch 2.7.1 + CUDA 12.6、FlashAttention） | 模型推理服务、微调、自研模型 |
+
+每个容器只挂载 `ws/` 中属于自己的目录，具体见 [开发指南](DEVELOPMENT.md#仓库与工作区)。
 
 ## 1. 准备与构建
 
@@ -41,7 +49,7 @@ ACCEPT_EULA=Y
 - `sim`：Python 依赖、CUDA 小算子、Isaac 自带 Jazzy 库、Isaac / Lab / Arena / RSL-RL 版本、GR00T 客户端源码导入，以及无界面空 Kit 启动；
 - `policy`：Python 依赖、CUDA 小算子、GR00T 与 DeepSpeed 导入、FlashAttention 小算子。
 
-检查不创建 ROS 通信图、训练环境或模型服务，也不下载权重。GUI 版本的 `sim` 检查：`./scripts/lab sim-gui python /workspace/scripts/check_installation.py sim --gui`，空窗口自动退出。`sim` 的 `uv pip check` 仍报告 coverage、websockets 两项上游元数据差异（见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)），安装检查通过不代表上游元数据完全一致。
+检查不创建 ROS 通信图、训练环境或模型服务，也不下载权重。GUI 版本的 `sim` 检查：`./scripts/lab check-installation sim --gui`，空窗口自动退出。检查脚本 `docker/check_installation.py` 属于环境工具，只在检查时临时挂进容器。`sim` 的 `uv pip check` 仍报告 coverage、websockets 两项上游元数据差异（见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)），安装检查通过不代表上游元数据完全一致。
 
 ## 2. IDE
 
@@ -53,12 +61,12 @@ ACCEPT_EULA=Y
 | Robotics lab sim | Isaac 任务开发、调试与 RL | `/opt/arena/.venv/bin/python` |
 | Robotics lab policy | GR00T 与模型代码 | `/opt/policy-venv/bin/python` |
 
-- 三个配置打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
-- 日常只需要 dev 窗口：ROS、C++、学习沙盒、文档和 Git 都在这里。编辑或调试依赖 Isaac、GR00T 的代码时再另开窗口（**File: New Window** → **Dev Containers: Open Folder in Container...** → 选择仓库根目录与 sim 或 policy 配置），以获得对应环境的补全和断点调试；只运行仿真、训练或推理服务时不必开窗口，直接在主机执行 `./scripts/lab` 入口。三个窗口看到的是同一份文件，任何一处的修改都会立即出现在其他窗口；Git 操作建议只在 dev 窗口做。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续空转（只占少量内存，不占 GPU），不用时可在主机执行 `docker compose --profile sim --profile policy stop sim policy` 停止。
-- 每个容器只装自己的依赖，Pylance 因此只诊断已打开的文件：在 sim 窗口打开 `rossrc/` 这类属于 dev 的代码，出现无法解析的导入属于正常现象。所有服务使用主机网络，端口本来就在主机上，三个配置都关闭了 VS Code 的自动端口转发。
+- 三个配置分别在 `.devcontainer/dev|sim|policy/`，打开时选择其一。打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它为每个容器挂载各自的 VS Code 配置（`.devcontainer/<容器>/vscode/` → `/workspace/.vscode`），并把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
+- 日常只需要 dev 窗口：ROS、C++、学习沙盒和文档都在这里。编辑或调试依赖 Isaac、GR00T 的代码时再另开窗口（**File: New Window** → **Dev Containers: Open Folder in Container...** → 选择仓库根目录与 sim 或 policy 配置），以获得对应环境的补全和断点调试；只运行仿真、训练或推理服务时不必开窗口，直接在主机执行 `./scripts/lab` 入口。各窗口只看到本容器挂载的目录，共同挂载的 `docs/`、`experiments/` 在任何一处修改都会立即同步。容器里没有 `.git`，提交、推送在主机上进行。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续空转（只占少量内存，不占 GPU），不用时可在主机执行 `docker compose --profile sim --profile policy stop sim policy` 停止。
+- 每个容器只装自己的依赖，Pylance 因此只诊断已打开的文件：依赖缺失的提示只出现在你打开的文件上。所有服务使用主机网络，端口本来就在主机上，三个配置都关闭了 VS Code 的自动端口转发。
 - sim、policy 镜像没有系统 Python，只有镜像内固定的解释器。VS Code 的 Python Environments 扩展可能弹出“No Python found… install Python using uv”，选 **Don't ask again** 即可，不要让它在运行时安装解释器。
 - `dev` 的 `python3` 是带 ROS 依赖的系统 Python，ROS 节点直接用它运行；学习沙盒环境不在 `PATH` 中，终端也不自动激活，见 [学习沙盒工具链](TOOLCHAIN.md)。Pylance 额外加载 ROS 的 Python 包路径。
-- `.vscode/launch.json` 为学习沙盒、ROS、Isaac、GR00T 各提供“当前文件”调试配置，选与当前容器相符的一项。
+- 各容器的 `launch.json` 只包含本容器的调试配置：dev 有 C++、学习沙盒与 ROS 节点，sim 有 Isaac 当前文件，policy 有 GR00T 当前文件。Ruff 规则在 `.devcontainer/ruff/ruff.toml`，只读挂载为 `/opt/ruff/ruff.toml`，编辑器通过 `ruff.configuration` 读取，命令行用 `ruff check --config /opt/ruff/ruff.toml`；Ruff 缓存写在容器内部，不回到主机。
 - `sim` 配置加载 GUI 叠加文件，要求 VS Code 进程拿到当前的 `DISPLAY`、`XAUTHORITY` 并能读取会话 cookie；必要时从 Linux 桌面终端启动 VS Code。`dev` 配置不申请 GPU 和显示，需要 RViz 时用 `./scripts/lab rviz`。
 - IDE 打开容器时可能触发镜像构建；Docker Compose 需 ≥ 2.30 以支持 [`gpus` 配置](https://docs.docker.com/reference/compose-file/services/#gpus)。
 
@@ -99,15 +107,15 @@ docker compose exec dev bash -c 'source /opt/ros/jazzy/setup.bash && ros2 pkg pr
 - ROS 变量在 `compose.yaml` 的 `x-ros-env` 中统一定义，`dev` 与 `sim` 共用；`ROS_DOMAIN_ID`、`RMW_IMPLEMENTATION`、`FASTDDS_BUILTIN_TRANSPORTS` 可在 `.env` 覆盖。Isaac 自带 Fast DDS 与 Cyclone DDS 两种 RMW，`dev` 目前只装 Fast DDS，改用 Cyclone DDS 前需在 `docker/Dockerfile.dev` 加 `ros-jazzy-rmw-cyclonedds-cpp`。
 - `sim` 使用 Isaac 自带的 Jazzy bridge 库，不安装 ROS apt 包，也不加载 `dev` 的 `/opt/ros`。桥接双方需要匹配 domain、消息类型与 QoS。
 
-项目的 ROS 包放在 `src/ros`，构建产物放 `output/ros`，不在仓库根目录运行 colcon（最小收发示例见学习沙盒 `rossrc/`，[学习沙盒工具链](TOOLCHAIN.md#ros-2rossrc)）：
+项目的 ROS 包放在 `src/ros`，构建产物放 `/build/ros`（主机 `output/build/ros`），不在 `/workspace` 根目录运行 colcon（最小收发示例见学习沙盒 `rossrc/`，[学习沙盒工具链](TOOLCHAIN.md#ros-2rossrc)）：
 
 ```bash
 rosdep update
-colcon --log-base output/ros/log build \
+colcon --log-base /build/ros/log build \
   --base-paths src/ros \
-  --build-base output/ros/build \
-  --install-base output/ros/install
-source output/ros/install/setup.bash
+  --build-base /build/ros/build \
+  --install-base /build/ros/install
+source /build/ros/install/setup.bash
 ```
 
 镜像已初始化 rosdep 系统源，`rosdep update` 只更新个人索引。新增系统依赖写入 `docker/Dockerfile.dev` 与包的 `package.xml` 后重建镜像。
@@ -154,8 +162,8 @@ hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
 
 ## 6. 数据、缓存与身份
 
-- 仓库绑定为 `/workspace`，`output/storage` 为 `/data`，`output/runs` 为 `/runs`，三个容器路径一致。容器退出后结果仍在主机的 `output/` 中，可直接查看。
-- `dev` 没有命名卷：学习沙盒依赖在镜像内，C++ 构建目录在 `output/build`，ROS 产物在 `output/ros`。
+- `/workspace` 只包含本容器挂载的 `ws/` 子目录；`output/storage` 为 `/data`，`output/runs` 为 `/runs`，三个容器路径一致；dev 另有 `/build`（主机 `output/build`）。容器退出后结果仍在主机的 `output/` 中，可直接查看。
+- `dev` 没有命名卷：学习沙盒依赖在镜像内，C++ 与 ROS 的构建产物都在 `/build` 下（`cppsrc`、`rossrc`、`ros` 各一个子目录）。
 - `sim`、`policy` 各有缓存卷；Kit 的 `data`、`cache`、`logs` 另有命名卷，保留窗口布局、着色器缓存与应用日志。CUDA JIT 缓存（`CUDA_CACHE_PATH`）与 Triton 缓存放在各自缓存卷的子目录。
 - 镜像用户的 UID/GID 在构建时由 `.env` 决定；更换身份需要重建镜像，并处理已有卷的权限。
 

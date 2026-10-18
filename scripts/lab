@@ -6,7 +6,7 @@ cd "$project_dir"
 compose=(docker compose --project-directory "$project_dir" -f "$project_dir/compose.yaml")
 
 prepare() {
-    mkdir -p output/runs/rl output/storage/{models,datasets,assets}
+    mkdir -p output/build output/runs/rl output/storage/{models,datasets,assets}
     if [[ ! -e .env ]]; then
         printf 'LOCAL_UID=%s\nLOCAL_GID=%s\nROS_DOMAIN_ID=0\n' "$(id -u)" "$(id -g)" > .env
         printf '# After accepting the Isaac Sim license, set OMNI_KIT_ACCEPT_EULA=YES and ACCEPT_EULA=Y.\n' >> .env
@@ -58,10 +58,13 @@ case "$command" in
             ros) service=dev; interpreter=/usr/bin/python3 ;;
             sim) service=sim; interpreter=/opt/arena/.venv/bin/python ;;
             policy) service=policy; interpreter=/opt/policy-venv/bin/python ;;
-            *) echo 'Use: scripts/lab check-installation ros|sim|policy' >&2; exit 2 ;;
+            *) echo 'Use: scripts/lab check-installation ros|sim|policy [--gui]' >&2; exit 2 ;;
         esac
-        exec "${compose[@]}" run --rm --no-deps "$service" "$interpreter" \
-            /workspace/scripts/check_installation.py "$scope"
+        if [[ "${2:-}" == --gui ]]; then gui_compose; fi
+        # The check script is environment tooling, not workspace code: mount it only for this run.
+        exec "${compose[@]}" run --rm --no-deps \
+            -v "$project_dir/docker/check_installation.py:/opt/robotics-lab/check_installation.py:ro" \
+            "$service" "$interpreter" /opt/robotics-lab/check_installation.py "${@:1}"
         ;;
     dev)
         prepare
@@ -131,7 +134,7 @@ case "$command" in
         ;;
     policy-server)
         prepare
-        source experiments/arena_g1/experiment.env
+        source ws/experiments/arena_g1/experiment.env
         exec "${compose[@]}" run --rm --no-deps policy python gr00t/eval/run_gr00t_server.py \
             --model-path "${POLICY_MODEL_PATH:-/data/models/arena-g1/checkpoint-20000}" \
             --embodiment-tag NEW_EMBODIMENT --device cuda --host 127.0.0.1 \
@@ -139,7 +142,7 @@ case "$command" in
         ;;
     policy-ping)
         prepare
-        source experiments/arena_g1/experiment.env
+        source ws/experiments/arena_g1/experiment.env
         exec "${compose[@]}" run --rm --no-deps policy python \
             /opt/arena/isaaclab_arena_gr00t/utils/wait_for_gr00t_server.py \
             --host 127.0.0.1 --port "${POLICY_PORT:-5555}" \
@@ -147,7 +150,7 @@ case "$command" in
         ;;
     g1-evaluate)
         prepare
-        source experiments/arena_g1/experiment.env
+        source ws/experiments/arena_g1/experiment.env
         gui_compose
         # Only this upstream integration uses the GR00T client source in Python 3.12.
         # The complete GR00T model package is installed exclusively in policy (3.10).
@@ -168,7 +171,7 @@ Run from the Linux host terminal in this repository:
   scripts/lab build            Build ROS (with RViz), simulation and AI images
   scripts/lab pull             Pull images configured by IMAGE_PREFIX / IMAGE_TAG
   scripts/lab publish          Push built images to the configured registry
-  scripts/lab check-installation ros|sim|policy
+  scripts/lab check-installation ros|sim|policy [--gui]
                               Check frameworks only; no communication or training
   scripts/lab dev              Start the ROS development container
   scripts/lab ros-shell        Open a separate ROS development shell

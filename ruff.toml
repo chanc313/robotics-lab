@@ -1,7 +1,0 @@
-# One Python style for scripts/, src/ modules and pythonsrc/.
-# py310 is the oldest interpreter in use (policy image).
-target-version = "py310"
-line-length = 100
-
-[lint]
-select = ["E4", "E7", "E9", "F", "I"]

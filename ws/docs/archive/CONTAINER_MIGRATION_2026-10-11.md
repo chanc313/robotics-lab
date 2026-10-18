@@ -1,6 +1,6 @@
 # 容器迁移与骨架复审
 
-此文件是迁移检查历史记录；之后 `src/control` 已移除、学习入口移到顶层，现状以 [README](../../README.md) 与 [路线图](../ROADMAP.md) 为准。按用户后续要求，当前配置已精简为 `dev`、`sim`、`policy` **三个镜像**：原生嵌入式 C++ 控制源码保留在 `src/control`，使用 `dev` 的现有工具链；ROS GUI 合入 `dev`，Isaac GUI 继续使用 `sim`。旧的独立 `control` / `gui` 镜像与四套 IDE 方案已淘汰，`interfaces` 占位目录和独立架构文档已移除。当前架构见 [README](../../README.md) 与 [开发指南](../DEVELOPMENT.md)。
+此文件是迁移检查历史记录；之后 `src/control` 已移除、学习入口移到顶层，现状以 [开发指南](../DEVELOPMENT.md) 与 [路线图](../ROADMAP.md) 为准。按用户后续要求，当前配置已精简为 `dev`、`sim`、`policy` **三个镜像**：原生嵌入式 C++ 控制源码保留在 `src/control`，使用 `dev` 的现有工具链；ROS GUI 合入 `dev`，Isaac GUI 继续使用 `sim`。旧的独立 `control` / `gui` 镜像与四套 IDE 方案已淘汰，`interfaces` 占位目录和独立架构文档已移除。当前架构见 [开发指南](../DEVELOPMENT.md)。
 
 ## 本轮精简状态
 

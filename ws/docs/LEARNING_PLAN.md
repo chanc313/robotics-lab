@@ -86,7 +86,7 @@ Arena 的 G1 教程分五步：环境准备 → 遥操作采集示范 → Mimic 
 - **做**：
   1. `./scripts/lab tutorial basic`：练习聚焦、旋转、平移视角；在 Stage 中找到 `/World/Object`，在 Property 查看位置和尺寸；暂停、继续，再关闭窗口。
   2. `./scripts/lab tutorial ik`：观察末端目标、IK 求解和机械臂运动，体会"末端目标 → IK → 关节目标 → 物理运动"。
-  3. 读 `output/runs/setup/2026-10-12/verification/minimal_closed_loop.py`（约 60 行）：每一步读方块位置 → 算速度指令 → 下发 → 推进物理。按文件开头的命令运行它，再把 `gain` 从 10 改成 2，先预测最终误差，再运行验证。
+  3. 读主机上的 `output/runs/setup/2026-10-12/verification/minimal_closed_loop.py`（约 60 行，sim 容器里是 `/runs/setup/2026-10-12/verification/minimal_closed_loop.py`）：每一步读方块位置 → 算速度指令 → 下发 → 推进物理。按文件开头的命令运行它，再把 `gain` 从 10 改成 2，先预测最终误差，再运行验证。
 - **概念**：USD 场景与 Prim、`SimulationContext`、刚体与关节体（Articulation）、物理步长与控制步长（decimation）。
 - **理解检查**：增益改成 2 后，方块为什么停在离目标约 2 cm 的地方？这和控制器、摩擦各有什么关系？IK 教程里有没有神经网络？
 

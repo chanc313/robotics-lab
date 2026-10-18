@@ -1,0 +1,25 @@
+{
+  "python.defaultInterpreterPath": "/opt/arena/.venv/bin/python",
+  "python.terminal.activateEnvironment": false,
+  "python.analysis.typeCheckingMode": "basic",
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "python.analysis.exclude": [
+    "**/__pycache__"
+  ],
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "ruff.configuration": "/opt/ruff/ruff.toml",
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "files.exclude": {
+    "**/__pycache__": true
+  }
+}

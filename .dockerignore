@@ -1,4 +1,4 @@
-# Images copy only docker/ and pythonsrc/ dependency manifests; keep the context small.
+# Images copy only docker/ and the ws/pythonsrc dependency manifests; keep the context small.
 .git
 output
 **/.venv
