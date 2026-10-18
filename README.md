@@ -2,17 +2,17 @@
 
 长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS 与控制，全部在容器中开发和运行。当前起点是复现 **Isaac Lab-Arena × GR00T N1.6 的 Unitree G1 移动双臂**流程，再在其上优化与迭代；推进顺序见 [路线图](ws/docs/ROADMAP.md)。
 
-## 技术栈
+## 三个容器
 
-三个镜像，各管一块，版本全部固定：
+三个容器相互独立、各自在内部闭环，不依赖彼此即可单独运行和验证；它们之间只通过数据交互（共享的 `/data`、`/runs` 与网络端点），跨容器接口留待[路线图](ws/docs/ROADMAP.md)第 2 步设计。版本全部固定。
 
-| 镜像 | 技术栈 | 用途 |
+| 容器 | 闭环功能（纯净骨架） | 目前在 G1 项目中的角色 |
 |---|---|---|
-| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MoveIt 2、Nav2、MuJoCo 3.12（含 mujoco_ros2_control）、Clang 20 / CMake / GDB、Python 学习环境 | ROS 与 C++ 开发、控制、机械臂规划、导航与 MuJoCo 学习 |
-| `sim` | Isaac Sim 6.0.1、Isaac Lab、Isaac Lab-Arena 0.3.0（Python 3.12）、RSL-RL、Isaac 自带的 ROS 2 Jazzy 桥接 | 仿真、GUI、强化学习训练、评估、数据转换 |
-| `policy` | GR00T N1.6（Python 3.10、PyTorch 2.7.1 + CUDA 12.6、FlashAttention、DeepSpeed） | 模型推理服务、微调、自研模型 |
+| `dev` | ROS 2 Jazzy 开发与通信、RViz；ros2_control + MuJoCo 控制闭环；MoveIt 2 规划、Nav2 导航；C++26 / Python 原生开发 | 尚未进入回路；`src/ros` 预留给 ROS 适配层，控制与规划工具目前服务于个人技术栈学习 |
+| `sim` | Isaac Sim 物理与渲染、Isaac Lab 环境、RSL-RL 强化学习训练、Arena 任务评估、数据生成与转换 | 运行 G1 移动操作任务，作为 GR00T 推理服务的客户端执行闭环评估 |
+| `policy` | GR00T N1.6 推理服务、模型微调与训练、自研模型开发 | 加载官方 G1 微调权重，为 sim 提供动作块 |
 
-`dev` 里的 ros2_control、MoveIt 2、Nav2 与 MuJoCo 服务于个人技术栈的学习，项目回路暂未使用。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
+各容器的镜像内容与功能清单见 [容器指南](ws/docs/CONTAINERS.md#三个容器)。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
 
 ## 目录
 

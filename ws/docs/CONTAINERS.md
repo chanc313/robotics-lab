@@ -2,11 +2,49 @@
 
 ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GPU 驱动、显示和文件存储，主机原生的 ROS、Isaac、模型 Python 环境不参与项目。下文的 `./scripts/lab` 命令都在 **Linux 主机终端**、仓库根目录执行，它们启动对应容器并在其中运行程序。
 
-| 镜像 | 内容 | 用途 |
-|---|---|---|
-| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MoveIt 2（含 Panda 示例配置）、Nav2 核心、MuJoCo 3.12（含 mujoco_ros2_control 及示例）、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz、控制、机械臂规划、导航与 MuJoCo 学习 |
-| `sim` | Isaac Sim 6.0.1 / Isaac Lab / Arena 0.3.0（Python 3.12），Isaac 自带 Jazzy bridge | 仿真、GUI、RL 训练、评估、数据转换 |
-| `policy` | GR00T N1.6（Python 3.10、Torch 2.7.1 + CUDA 12.6、FlashAttention） | 模型推理服务、微调、自研模型 |
+## 三个容器
+
+三个容器相互独立，各自在内部形成闭环：不依赖另外两个，也能单独构建、运行和验证。它们之间只通过数据交互：共享的 `/data`（模型、数据集、资产）、`/runs`（日志、checkpoint、报告），以及网络端点（目前只有 sim 与 policy 之间的 GR00T 推理服务）。跨容器的接口还没有设计，见 [路线图](ROADMAP.md) 第 2 步。下面每个容器都分开写两件事：作为纯净骨架，它自身能做什么；目前它在 G1 项目里承担什么。
+
+### dev：ROS 2、控制与规划
+
+**镜像内容**：Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control 与 ros2_controllers、MoveIt 2（含 Panda 示例配置）、Nav2 核心、MuJoCo 3.12（含 mujoco_ros2_control 及示例）、Clang 20 / CMake / GDB、Python 学习环境。
+
+**闭环功能（纯净骨架）**：
+
+- 构建与运行 ROS 2 包（colcon、rclcpp / rclpy），话题、服务、动作通信，RViz 可视化，rosbag 记录。
+- 控制闭环：MuJoCo 物理作为 ros2_control 的硬件接口，控制器读状态、写指令，整个回路在容器内完成。
+- 机械臂运动规划（MoveIt 2）与移动导航（Nav2）。
+- C++26 与 Python 的原生开发和调试（`cppsrc/`、`pythonsrc/`、`rossrc/`）。
+
+**目前在 G1 项目中的角色**：尚未进入 G1 回路。`src/ros` 预留给 ROS 适配层，按路线图第 3–4 步先旁路观察 Isaac 发布的状态，再让 ROS 进入回路。ros2_control、MoveIt 2、Nav2、MuJoCo 目前服务于个人技术栈的学习。
+
+### sim：Isaac 仿真与强化学习
+
+**镜像内容**：Isaac Sim 6.0.1、Isaac Lab、Isaac Lab-Arena 0.3.0（Python 3.12）、RSL-RL、Isaac 自带的 ROS 2 Jazzy 桥接。
+
+**闭环功能（纯净骨架）**：
+
+- Isaac Sim 物理（PhysX）、RTX 渲染与 GUI。
+- Isaac Lab 环境：场景、观测、动作、奖励、终止条件，支持多环境并行。
+- 强化学习训练（RSL-RL）：环境、策略与训练更新组成的完整回路。
+- Arena 任务组合与评估：`policy_runner` 运行策略，按任务判定统计指标并生成报告。
+- 数据：Mimic 示范扩增，HDF5 到 LeRobot 格式的转换。
+
+**目前在 G1 项目中的角色**：运行 G1 移动操作任务（Galileo 仓库场景、G1 与全身控制器、放置判定），作为 GR00T 推理服务的客户端执行闭环评估。
+
+### policy：模型训练与推理
+
+**镜像内容**：GR00T N1.6（Python 3.10、PyTorch 2.7.1 + CUDA 12.6、FlashAttention、DeepSpeed）。
+
+**闭环功能（纯净骨架）**：
+
+- 模型推理服务（GR00T PolicyServer，ZMQ）。
+- 模型微调与训练（DeepSpeed、FlashAttention），读取 LeRobot 格式数据。
+- 自研模型开发（`src/ai`）。
+- 容器内的完整流程：数据 → 训练 → checkpoint → 推理服务。
+
+**目前在 G1 项目中的角色**：加载官方 G1 微调权重（`nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation`），为 sim 提供每次 50 步的动作块。
 
 每个容器只挂载 `ws/` 中属于自己的目录，具体见 [开发指南](DEVELOPMENT.md#仓库与工作区)。
 

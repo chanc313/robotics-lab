@@ -8,3 +8,5 @@ __pycache__/
 .ruff_cache/
 .ipynb_checkpoints/
 *.egg-info/
+# Host-side VS Code state; each container gets its settings from .devcontainer/<container>/vscode.
+/.vscode/
