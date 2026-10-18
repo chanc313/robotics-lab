@@ -8,11 +8,11 @@
 
 | 镜像 | 技术栈 | 用途 |
 |---|---|---|
-| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MuJoCo 3.12（含 mujoco_ros2_control）、Clang 20 / CMake / GDB、Python 学习环境 | ROS 与 C++ 开发、控制与 MuJoCo 学习 |
+| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MoveIt 2、Nav2、MuJoCo 3.12（含 mujoco_ros2_control）、Clang 20 / CMake / GDB、Python 学习环境 | ROS 与 C++ 开发、控制、机械臂规划、导航与 MuJoCo 学习 |
 | `sim` | Isaac Sim 6.0.1、Isaac Lab、Isaac Lab-Arena 0.3.0（Python 3.12）、RSL-RL、Isaac 自带的 ROS 2 Jazzy 桥接 | 仿真、GUI、强化学习训练、评估、数据转换 |
 | `policy` | GR00T N1.6（Python 3.10、PyTorch 2.7.1 + CUDA 12.6、FlashAttention、DeepSpeed） | 模型推理服务、微调、自研模型 |
 
-`dev` 里的 ros2_control 与 MuJoCo 服务于个人技术栈的学习，项目回路暂未使用。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
+`dev` 里的 ros2_control、MoveIt 2、Nav2 与 MuJoCo 服务于个人技术栈的学习，项目回路暂未使用。Gazebo 与 Open-RMF 不在规划内，涉及多机器人时再评估。
 
 ## 目录
 
@@ -69,7 +69,7 @@ ws/                              开发工作区
 - [容器指南](ws/docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
 - [开发指南](ws/docs/DEVELOPMENT.md)：仓库结构、模块约定、依赖规则、接口与测试的时机
 - [路线图](ws/docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
-- [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：C++、Python、ROS 2、ros2_control 与 MuJoCo
+- [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：C++、Python、ROS 2、ros2_control、MuJoCo、MoveIt 2 与 Nav2
 - 学习材料：[G1 Demo 学习计划](ws/docs/LEARNING_PLAN.md)、[核心理论](ws/docs/CORE_CONCEPTS.md)、[ROS 2 入门](ws/docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](ws/docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[项目启动与第一阶段](ws/docs/PROJECT_START.md)
 - [历史记录](ws/docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
 

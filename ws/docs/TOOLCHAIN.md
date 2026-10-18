@@ -1,6 +1,6 @@
 # 学习沙盒工具链
 
-`cppsrc/`、`pythonsrc/`、`rossrc/` 是独立的 C++、Python、ROS 2 学习沙盒，`src/` 下的项目模块不依赖它们；`dev` 镜像另外预装了 ros2_control 与 MuJoCo，供控制方向的学习使用。三者都在 `dev` 容器中构建和运行（VS Code 的 dev 配置，或 `./scripts/lab ros-shell`），位于 `/workspace` 下；构建产物统一放在 `/build`（主机 `output/build`），不会出现在工作区里。
+`cppsrc/`、`pythonsrc/`、`rossrc/` 是独立的 C++、Python、ROS 2 学习沙盒，`src/` 下的项目模块不依赖它们；`dev` 镜像另外预装了 ros2_control、MuJoCo、MoveIt 2 与 Nav2，供控制、规划与导航方向的学习使用。三者都在 `dev` 容器中构建和运行（VS Code 的 dev 配置，或 `./scripts/lab ros-shell`），位于 `/workspace` 下；构建产物统一放在 `/build`（主机 `output/build`），不会出现在工作区里。
 
 ## C++：`cppsrc/`
 
@@ -93,3 +93,26 @@ uv run python -m mujoco.viewer
 ```
 
 容器里没有实时调度权限，`controller_manager` 启动时会提示无法启用 FIFO 实时调度，学习和仿真不受影响；需要实时性时再给 `dev` 加相应的容器权限。
+
+## MoveIt 2 与 Nav2
+
+两者都是 ROS 2 生态里的标准框架，项目回路目前不使用：
+
+- **MoveIt 2**：机械臂运动规划。给定目标位姿，负责逆运动学、避障路径规划和轨迹生成，再通过 ros2_control 交给关节执行，可以和上面的 mujoco_ros2_control 连成"规划 → 控制 → 仿真"。镜像附带 Panda 机械臂的示例配置。
+- **Nav2**：移动机器人导航，包括地图、定位、全局与局部规划和行为树，最终输出速度指令。G1 的全身控制器同样接收行走速度指令，因此 Nav2 可以用来驱动 G1 行走。镜像只装 Nav2 核心；官方的 `nav2_bringup` 示例依赖 Gazebo，所以没有装。
+
+打开 MoveIt 2 的官方演示（Panda 机械臂，带 RViz 交互规划；VS Code 的 dev 窗口或 `./scripts/lab dev-gui` 里运行）：
+
+```bash
+ros2 launch moveit_resources_panda_moveit_config demo.launch.py
+```
+
+在 RViz 的 MotionPlanning 面板拖动末端标记，点击 **Plan & Execute** 观察规划结果。Nav2 的各个服务器节点都可以单独启动，例如加载一张地图：
+
+```bash
+ros2 run nav2_map_server map_server --ros-args -p yaml_filename:=<地图.yaml>
+ros2 lifecycle set /map_server configure
+ros2 lifecycle set /map_server activate
+```
+
+Nav2 的节点都是生命周期节点（lifecycle node），先 configure 再 activate 才开始工作；完整的导航流程需要地图、定位和机器人模型，属于后续学习内容。

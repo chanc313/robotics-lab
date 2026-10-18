@@ -46,7 +46,7 @@ flowchart LR
 | 2026-10-11 | 测试与 CI 在全栈打通后再配置 |
 | 2026-10-11 | `sim`、`policy` 使用 `ipc: host`，满足 dataloader 与分布式训练的共享内存需求 |
 | 2026-10-18 | 仓库分两层：根目录放 Git、编排与基础设施，只在主机使用；开发工作区在 `ws/`，每个容器只挂载自己的目录，协作交给编排器；Git 只在主机上操作 |
-| 2026-10-18 | 容器也服务于个人技术栈，允许冗余：`dev` 预装 ros2_control 与 MuJoCo（含 mujoco_ros2_control），项目回路暂不使用；仿真方向只学 Isaac Sim 与 MuJoCo，不用 Gazebo；Open-RMF 等到涉及多机器人时再评估 |
+| 2026-10-18 | 容器也服务于个人技术栈，允许冗余：`dev` 预装 ros2_control、MuJoCo（含 mujoco_ros2_control）、MoveIt 2 与 Nav2 核心，项目回路暂不使用；仿真方向只学 Isaac Sim 与 MuJoCo，不用 Gazebo；Open-RMF 等到涉及多机器人时再评估 |
 
 ## 暂缓的工程项
 

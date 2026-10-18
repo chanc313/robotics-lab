@@ -4,7 +4,7 @@ ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GP
 
 | 镜像 | 内容 | 用途 |
 |---|---|---|
-| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MuJoCo 3.12（含 mujoco_ros2_control 及示例）、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz、控制与 MuJoCo 学习 |
+| `dev` | Ubuntu 24.04、ROS 2 Jazzy、RViz、ros2_control + ros2_controllers、MoveIt 2（含 Panda 示例配置）、Nav2 核心、MuJoCo 3.12（含 mujoco_ros2_control 及示例）、Clang 20 / CMake / GDB、学习沙盒依赖 | ROS 与 C++ 开发、RViz、控制、机械臂规划、导航与 MuJoCo 学习 |
 | `sim` | Isaac Sim 6.0.1 / Isaac Lab / Arena 0.3.0（Python 3.12），Isaac 自带 Jazzy bridge | 仿真、GUI、RL 训练、评估、数据转换 |
 | `policy` | GR00T N1.6（Python 3.10、Torch 2.7.1 + CUDA 12.6、FlashAttention） | 模型推理服务、微调、自研模型 |
 
@@ -45,7 +45,7 @@ ACCEPT_EULA=Y
 ./scripts/lab check-installation policy
 ```
 
-- `ros`：rclpy、debugpy、ROS 示例包、RViz、controller_manager、mujoco_ros2_control、rosdep、编译工具，以及学习沙盒环境（含 MuJoCo Python 跑一步仿真）；
+- `ros`：rclpy、debugpy、ROS 示例包、RViz、controller_manager、mujoco_ros2_control、MoveIt 2 的 move_group、Nav2、rosdep、编译工具，以及学习沙盒环境（含 MuJoCo Python 跑一步仿真）；
 - `sim`：Python 依赖、CUDA 小算子、Isaac 自带 Jazzy 库、Isaac / Lab / Arena / RSL-RL 版本、GR00T 客户端源码导入，以及无界面空 Kit 启动；
 - `policy`：Python 依赖、CUDA 小算子、GR00T 与 DeepSpeed 导入、FlashAttention 小算子。
 

@@ -52,7 +52,14 @@ def main():
     if scope == "ros":
         for module in ("rclpy", "debugpy"):
             report(module, importlib.import_module(module).__file__)
-        for package in ("demo_nodes_cpp", "rviz2", "controller_manager", "mujoco_ros2_control"):
+        for package in (
+            "demo_nodes_cpp",
+            "rviz2",
+            "controller_manager",
+            "mujoco_ros2_control",
+            "moveit_ros_move_group",
+            "nav2_bt_navigator",
+        ):
             subprocess.run(["ros2", "pkg", "prefix", package], check=True)
         subprocess.run(["rosdep", "--version"], check=True)
         for command in (os.environ["CXX"], "cmake", "ninja", "gdb"):

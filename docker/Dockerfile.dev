@@ -38,12 +38,16 @@ RUN . /etc/os-release && test "${VERSION_CODENAME}" = noble \
     && rm -rf /var/lib/apt/lists/* \
     && rosdep init
 
-# Control stack for the personal learning track, installed ahead of project use:
-# ros2_control, the standard controllers, and the MuJoCo hardware plugin with its demos
-# (mujoco_vendor ships MuJoCo 3.12.0; the learning env pins the matching Python bindings).
+# Robotics stack for the personal learning track, installed ahead of project use:
+# ros2_control and the standard controllers; the MuJoCo hardware plugin with its demos
+# (mujoco_vendor ships MuJoCo 3.12.0; the learning env pins the matching Python bindings);
+# MoveIt 2 with the Panda demo config; and the Nav2 core. nav2_bringup is left out because
+# it pulls in Gazebo, which this project does not use.
 RUN apt-get update && apt-get install -y --no-install-recommends \
        ros-jazzy-ros2-control ros-jazzy-ros2-controllers \
        ros-jazzy-mujoco-ros2-control ros-jazzy-mujoco-ros2-control-demos \
+       ros-jazzy-moveit ros-jazzy-moveit-resources-panda-moveit-config \
+       ros-jazzy-navigation2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Reuse an existing group when the requested GID is already allocated.
