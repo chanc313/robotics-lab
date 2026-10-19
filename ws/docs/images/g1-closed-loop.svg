@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 770" width="960" height="770" role="img" aria-labelledby="title desc">
+  <title id="title">G1 闭环：分层与时间尺度</title>
+  <desc id="desc">GR00T N1.6 在 policy 容器中约每秒推理一次，输出 50 步、每步 35 个数的动作块；sim 容器中的 Arena 适配器把它补成每步 50 维，逐步交给全身控制器；上身关节目标直接执行，腰和下身由 AGILE 强化学习策略生成；PhysX 每个控制步推进 4 个物理步；任务判定每个控制步检查一次；相机图像和关节状态回到适配器。</desc>
+  <defs>
+    <style>
+      text { font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; fill: #1f2328; }
+      .title { font-size: 15px; font-weight: 700; }
+      .body { font-size: 12.5px; fill: #2b3038; }
+      .small { font-size: 11.5px; fill: #5b6068; }
+      .band { font-size: 13px; font-weight: 700; }
+      .rate { font-size: 14px; font-weight: 700; }
+      .lab { font-size: 11.5px; fill: #3d4450; }
+    </style>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3d4450"/>
+    </marker>
+    <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a9e78"/>
+    </marker>
+  </defs>
+
+  <!-- card -->
+  <rect x="0.5" y="0.5" width="959" height="769" rx="16" fill="#fafaf7" stroke="#d9dbd3"/>
+  <text x="32" y="40" style="font-size:19px;font-weight:700">G1 闭环：分层与时间尺度</text>
+  <text x="32" y="63" class="small" style="font-size:12.5px">GR00T 低频规划"接下来一秒做什么"，全身控制与物理高频执行；右侧是每层的运行频率</text>
+
+  <!-- policy band -->
+  <rect x="40" y="85" width="880" height="130" rx="12" fill="#f4f0fa" stroke="#8a6fc0" stroke-width="1.5"/>
+  <text x="56" y="108" class="band" style="fill:#5b4a8a">policy 容器</text>
+  <rect x="200" y="120" width="560" height="82" rx="8" fill="#ffffff" stroke="#c5b5e3"/>
+  <text x="480" y="147" text-anchor="middle" class="title">GR00T N1.6（视觉-语言-动作模型）</text>
+  <text x="480" y="171" text-anchor="middle" class="body">输入：头部相机图像 · 上身 31 个关节状态 · 语言指令</text>
+  <text x="480" y="192" text-anchor="middle" class="small">输出：未来 50 步，每步 35 个数（双臂、双手、腰、身体高度、行走指令）</text>
+  <rect x="784" y="137" width="120" height="48" rx="8" fill="#ece5f7"/>
+  <text x="844" y="158" text-anchor="middle" class="rate" style="fill:#5b4a8a">约 1 Hz</text>
+  <text x="844" y="176" text-anchor="middle" class="small">每 50 个控制步</text>
+
+  <!-- sim band -->
+  <rect x="40" y="240" width="880" height="452" rx="12" fill="#eef6f1" stroke="#5a9e78" stroke-width="1.5"/>
+  <text x="56" y="263" class="band" style="fill:#2f6e4c">sim 容器</text>
+  <text x="56" y="281" class="small">同一个进程</text>
+
+  <!-- ZMQ link -->
+  <line x1="360" y1="288" x2="360" y2="204" stroke="#3d4450" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="352" y="262" text-anchor="end" class="lab">观测（每 50 步发一次）</text>
+  <line x1="600" y1="204" x2="600" y2="286" stroke="#3d4450" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="608" y="262" class="lab">动作块：50 步 × 35 维</text>
+  <text x="480" y="232" text-anchor="middle" class="small" style="font-weight:600">ZMQ · 127.0.0.1:5555</text>
+
+  <!-- A: adapter -->
+  <rect x="200" y="288" width="560" height="80" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="480" y="312" text-anchor="middle" class="title">Arena 适配器（GR00T 远程策略）</text>
+  <text x="480" y="335" text-anchor="middle" class="body">观测整理：按关节名把仿真顺序重排成 GR00T 的分组</text>
+  <text x="480" y="356" text-anchor="middle" class="body">动作拼装：35 维补成 50 维（腿 12 维、躯干姿态 3 维填 0），每个控制步取一行</text>
+  <rect x="784" y="304" width="120" height="48" rx="8" fill="#dcefe3"/>
+  <text x="844" y="325" text-anchor="middle" class="rate" style="fill:#2f6e4c">50 Hz</text>
+  <text x="844" y="343" text-anchor="middle" class="small">每个控制步</text>
+
+  <line x1="480" y1="368" x2="480" y2="391" stroke="#5a9e78" stroke-width="1.6" marker-end="url(#ahg)"/>
+  <text x="490" y="385" class="lab">每步 50 维：43 个关节 + 行走 3 + 高度 1 + 躯干姿态 3</text>
+
+  <!-- B: WBC -->
+  <rect x="200" y="392" width="560" height="100" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="480" y="416" text-anchor="middle" class="title">G1 全身控制 WBC（g1_wbc_joint）</text>
+  <rect x="216" y="428" width="260" height="52" rx="6" fill="#f4f9f6" stroke="#cfe3d6"/>
+  <text x="346" y="449" text-anchor="middle" class="body" style="font-weight:600">上身：双臂、双手</text>
+  <text x="346" y="469" text-anchor="middle" class="small">关节目标直接执行</text>
+  <rect x="484" y="428" width="260" height="52" rx="6" fill="#f4f9f6" stroke="#cfe3d6"/>
+  <text x="614" y="449" text-anchor="middle" class="body" style="font-weight:600">腰与下身：AGILE 强化学习策略</text>
+  <text x="614" y="469" text-anchor="middle" class="small">行走指令 + 高度 → 腿和腰的关节目标</text>
+  <rect x="784" y="418" width="120" height="48" rx="8" fill="#dcefe3"/>
+  <text x="844" y="439" text-anchor="middle" class="rate" style="fill:#2f6e4c">50 Hz</text>
+  <text x="844" y="457" text-anchor="middle" class="small">每个控制步</text>
+
+  <line x1="480" y1="492" x2="480" y2="515" stroke="#5a9e78" stroke-width="1.6" marker-end="url(#ahg)"/>
+  <text x="490" y="509" class="lab">全身 43 个关节的位置目标</text>
+
+  <!-- C: PhysX -->
+  <rect x="200" y="516" width="560" height="54" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="480" y="539" text-anchor="middle" class="title">PhysX 物理仿真</text>
+  <text x="480" y="560" text-anchor="middle" class="small">每个控制步推进 4 个物理步（dt = 1/200 s）：关节驱动、碰撞、接触</text>
+  <rect x="784" y="519" width="120" height="48" rx="8" fill="#dcefe3"/>
+  <text x="844" y="540" text-anchor="middle" class="rate" style="fill:#2f6e4c">200 Hz</text>
+  <text x="844" y="558" text-anchor="middle" class="small">每个物理步</text>
+
+  <line x1="480" y1="570" x2="480" y2="593" stroke="#5a9e78" stroke-width="1.6" marker-end="url(#ahg)"/>
+
+  <!-- D: judge -->
+  <rect x="200" y="594" width="560" height="78" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="480" y="617" text-anchor="middle" class="title">Arena 任务判定</text>
+  <text x="480" y="640" text-anchor="middle" class="body">物体落稳 → 盒子抬过高度 → 放进箱子（接触力 &gt; 0.5 N，速度 &lt; 0.1）</text>
+  <text x="480" y="661" text-anchor="middle" class="small">一个 episode 最长 1500 个控制步（30 秒），成功或超时即结束</text>
+  <rect x="784" y="609" width="120" height="48" rx="8" fill="#dcefe3"/>
+  <text x="844" y="630" text-anchor="middle" class="rate" style="fill:#2f6e4c">50 Hz</text>
+  <text x="844" y="648" text-anchor="middle" class="small">每个控制步</text>
+
+  <!-- sensor feedback -->
+  <path d="M200 543 H176 V328 H199" fill="none" stroke="#5a9e78" stroke-width="1.6" marker-end="url(#ahg)"/>
+  <text x="166" y="420" text-anchor="end" class="lab" style="font-weight:600">传感器</text>
+  <text x="166" y="438" text-anchor="end" class="lab">头部相机图像</text>
+  <text x="166" y="456" text-anchor="end" class="lab">关节状态</text>
+  <text x="166" y="474" text-anchor="end" class="small">每个控制步</text>
+
+  <!-- notes -->
+  <text x="32" y="720" class="small">· 腰：GR00T 也输出 3 个腰部目标，但当前 AGILE 配置把腰交给下身策略，这 3 个值不会被执行。</text>
+  <text x="32" y="742" class="small">· 请求是同步的：取新动作块时，仿真等推理返回再继续，推理延迟不占用仿真时间。真机上做不到这一点，这是路线图第 4 步要量化的。</text>
+</svg>
