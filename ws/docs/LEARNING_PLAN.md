@@ -74,7 +74,7 @@ Arena 的 G1 教程分五步：环境准备 → 遥操作采集示范 → Mimic 
 
 1. 读完本页第一部分"宏观图景"。（15 分钟）
 2. 在主机浏览器打开成功那次的报告 `output/runs/arena-g1/evaluation/2026-10-13_06-38-43/index.html`，再看同目录下的 `episode_results_rank0.jsonl`。找到三个事件：第 1 步物体落稳、第 136 步盒子抬过高度、第 979 步放置成功。再看失败那次 `2026-10-13_06-17-27/episode_results_rank0.jsonl`：它在第 75 步就抬起了盒子，但直到第 1500 步都没放进箱子。（15 分钟）
-3. 粗读两份配置，不求全懂，只找关键字段（20 分钟）：
+3. 粗读两份配置，不求全懂，只找关键字段（20 分钟；逐字段讲解见 [配置导读](G1_GR00T_CONFIGS.md)）：
    - [GR00T 闭环配置](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/policy/config/g1_locomanip_gr00t_closedloop_config.yaml)：语言指令、`action_horizon: 50`、相机名 `robot_head_cam_rgb`。
    - [G1 模态配置](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/embodiments/g1/g1_sim_wbc_data_config.py)：输入是 `ego_view` 图像和左右臂、左右手、腰五组关节状态；输出是这五组关节加上 `base_height_command`、`navigate_command`，每次 50 步（`delta_indices` 为 0–49）。
 4. 理解检查（10 分钟）：
