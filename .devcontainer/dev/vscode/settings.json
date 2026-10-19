@@ -7,7 +7,9 @@
     "/opt/ros/jazzy/lib/python3.12/site-packages"
   ],
   "python.analysis.exclude": [
-    "**/__pycache__"
+    "**/__pycache__",
+    "**/output/storage",
+    "**/output/build"
   ],
   "terminal.integrated.cwd": "${workspaceFolder}",
   "[python]": {
@@ -30,12 +32,20 @@
   "files.exclude": {
     "**/__pycache__": true
   },
+  "files.watcherExclude": {
+    "**/output/storage/**": true,
+    "**/output/build/**": true
+  },
   "search.exclude": {
-    "**/uv.lock": true
+    "**/uv.lock": true,
+    "**/output/storage": true,
+    "**/output/build": true
   },
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "C_Cpp.default.includePath": [
-    "${workspaceFolder}/**",
+    "/workspace/cppsrc/**",
+    "/workspace/rossrc/**",
+    "/workspace/src/ros/**",
     "/opt/ros/jazzy/include/**"
   ],
   "cmake.useCMakePresets": "never",

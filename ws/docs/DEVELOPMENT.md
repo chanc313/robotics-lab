@@ -20,7 +20,7 @@
 - 在容器里只往挂载的目录写文件。直接写在 `/workspace` 根目录或 `/workspace/src/` 下的内容只存在于容器内部，重建容器就会丢失。
 - 新增模块或顶层目录属于目录结构调整，先讨论方案；确定后在主机 `ws/` 下建立目录，并在 `compose.yaml` 中给需要它的容器加上挂载。
 
-每个容器的 VS Code 设置、任务和调试配置放在 `.devcontainer/<容器>/vscode/`，挂载为该容器的 `/workspace/.vscode`；该容器的说明 `.devcontainer/<容器>/README.md` 只读挂载为 `/workspace/README.md`；Ruff 规则统一放在 `.devcontainer/ruff/ruff.toml`，只读挂载到三个容器的 `/opt/ruff`。
+每个容器的 VS Code 设置、任务和调试配置放在 `.devcontainer/<容器>/vscode/`，挂载为该容器的 `/workspace/.vscode`；该容器的说明 `.devcontainer/<容器>/README.md` 只读挂载为 `/workspace/README.md`；在 VS Code 里，该容器用到的 `output/` 子目录还会出现在 `/workspace/output/` 下，方便在资源管理器中浏览，它们和 `/build`、`/runs`、`/data` 是同一批目录；Ruff 规则统一放在 `.devcontainer/ruff/ruff.toml`，只读挂载到三个容器的 `/opt/ruff`。
 
 ## 模块约定
 

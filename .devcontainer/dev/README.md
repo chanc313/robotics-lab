@@ -41,6 +41,7 @@
 | `/workspace/.vscode` | 本容器的 VS Code 设置、任务与调试配置 |
 | `/build` | 构建产物（cppsrc、rossrc、ros 各一个子目录） |
 | `/data`、`/runs` | 共享的模型数据与运行记录 |
+| `/workspace/output` | 主机的整个 `output/`（即 `/build`、`/runs`、`/data` 三个目录），仅在 VS Code 窗口中挂载，方便在资源管理器里浏览 |
 | `/opt/ruff` | 共享 Ruff 规则（只读） |
 
 只往上述挂载目录写文件；直接写在 `/workspace` 根目录或 `/workspace/src/` 下的内容只留在容器内部，重建即丢失。容器里没有 `.git`，Git 在主机上操作。

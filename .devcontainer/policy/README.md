@@ -37,6 +37,7 @@
 | `/workspace/experiments` | 实验组合配置（与 sim 共享） |
 | `/workspace/.vscode` | 本容器的 VS Code 设置与调试配置 |
 | `/data`、`/runs` | 共享的权重、数据集与运行记录 |
+| `/workspace/output/storage`、`/workspace/output/runs` | 同上两个目录，仅在 VS Code 窗口中挂载，方便在资源管理器里浏览 |
 | `/opt/ruff` | 共享 Ruff 规则（只读） |
 
 Hugging Face、Triton、CUDA 编译缓存保存在命名卷中。只往挂载目录写文件；容器里没有 `.git`，Git 在主机上操作。

@@ -67,7 +67,7 @@ ACCEPT_EULA=Y
 | Robotics lab sim | Isaac 任务开发、调试与 RL | `/opt/arena/.venv/bin/python` |
 | Robotics lab policy | GR00T 与模型代码 | `/opt/policy-venv/bin/python` |
 
-- 三个配置分别在 `.devcontainer/dev|sim|policy/`，打开时选择其一。打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它为每个容器挂载各自的 VS Code 配置（`.devcontainer/<容器>/vscode/` → `/workspace/.vscode`），并把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
+- 三个配置分别在 `.devcontainer/dev|sim|policy/`，打开时选择其一。打开前都在主机执行 `./scripts/lab prepare`，三者共用 `.devcontainer/compose.devcontainer.yaml`：它为每个容器挂载各自的 VS Code 配置（`.devcontainer/<容器>/vscode/` → `/workspace/.vscode`）和 README，并把该容器用到的 `output/` 子目录同时挂到 `/workspace/output/`，让资源管理器能看到运行产物（dev 是整个 `output/`，sim 与 policy 是 `runs/`、`storage/`）；并把 VS Code 生成临时 Dockerfile 的目录 `${TMPDIR:-/tmp}/devcontainercli-${USER}/container-features` 声明为附加构建上下文，绕开 [Compose / Buildx 读取外部 Dockerfile 的问题](https://github.com/docker/compose/pull/14286)。该目录不会进入镜像，`scripts/lab build` 也不加载这个文件。
 - 日常只需要 dev 窗口：ROS、C++、学习沙盒和文档都在这里。编辑或调试依赖 Isaac、GR00T 的代码时再另开窗口（**File: New Window** → **Dev Containers: Open Folder in Container...** → 选择仓库根目录与 sim 或 policy 配置），以获得对应环境的补全和断点调试；只运行仿真、训练或推理服务时不必开窗口，直接在主机执行 `./scripts/lab` 入口。各窗口只看到本容器挂载的目录，共同挂载的 `docs/`、`experiments/` 在任何一处修改都会立即同步。容器里没有 `.git`，提交、推送在主机上进行。三个配置都设置 `shutdownAction: "none"`，关闭窗口后容器继续空转（只占少量内存，不占 GPU），不用时可在主机执行 `docker compose --profile sim --profile policy stop sim policy` 停止。
 - 每个容器只装自己的依赖，Pylance 因此只诊断已打开的文件：依赖缺失的提示只出现在你打开的文件上。所有服务使用主机网络，端口本来就在主机上，三个配置都关闭了 VS Code 的自动端口转发。
 - sim、policy 镜像没有系统 Python，只有镜像内固定的解释器。VS Code 的 Python Environments 扩展可能弹出“No Python found… install Python using uv”，选 **Don't ask again** 即可，不要让它在运行时安装解释器。
@@ -168,7 +168,7 @@ hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
 
 ## 6. 数据、缓存与身份
 
-- `/workspace` 只包含本容器挂载的 `ws/` 子目录；`output/storage` 为 `/data`，`output/runs` 为 `/runs`，三个容器路径一致；dev 另有 `/build`（主机 `output/build`）。容器退出后结果仍在主机的 `output/` 中，可直接查看。
+- `/workspace` 只包含本容器挂载的 `ws/` 子目录；`output/storage` 为 `/data`，`output/runs` 为 `/runs`，三个容器路径一致；dev 另有 `/build`（主机 `output/build`）。脚本和命令一律使用这些短路径；VS Code 窗口里的 `/workspace/output/` 只是同一批目录的浏览入口。容器退出后结果仍在主机的 `output/` 中，可直接查看。
 - `dev` 没有命名卷：学习沙盒依赖在镜像内，C++ 与 ROS 的构建产物都在 `/build` 下（`cppsrc`、`rossrc`、`ros` 各一个子目录）。
 - `sim`、`policy` 各有缓存卷；Kit 的 `data`、`cache`、`logs` 另有命名卷，保留窗口布局、着色器缓存与应用日志。CUDA JIT 缓存（`CUDA_CACHE_PATH`）与 Triton 缓存放在各自缓存卷的子目录。
 - 镜像用户的 UID/GID 在构建时由 `.env` 决定；更换身份需要重建镜像，并处理已有卷的权限。

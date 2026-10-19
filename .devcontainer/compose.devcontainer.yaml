@@ -2,7 +2,9 @@
 #
 # Each container gets its own VS Code workspace settings, tasks and launch configs,
 # mounted as /workspace/.vscode, and its own README as /workspace/README.md
-# (paths resolve from the repository root).
+# (paths resolve from the repository root). The output folders it uses also appear
+# under /workspace/output so the Explorer shows them; they are the same directories
+# that scripts reach as /build, /runs and /data.
 #
 # Compose / Buildx currently omit external Dockerfiles from Bake's fs.read list.
 # VS Code writes its generated Dockerfile under devcontainer_files; this named context
@@ -16,6 +18,7 @@ services:
     volumes:
       - ./.devcontainer/dev/vscode:/workspace/.vscode
       - ./.devcontainer/dev/README.md:/workspace/README.md:ro
+      - ./output:/workspace/output
   sim:
     build:
       additional_contexts:
@@ -23,6 +26,8 @@ services:
     volumes:
       - ./.devcontainer/sim/vscode:/workspace/.vscode
       - ./.devcontainer/sim/README.md:/workspace/README.md:ro
+      - ./output/runs:/workspace/output/runs
+      - ./output/storage:/workspace/output/storage
   policy:
     build:
       additional_contexts:
@@ -30,3 +35,5 @@ services:
     volumes:
       - ./.devcontainer/policy/vscode:/workspace/.vscode
       - ./.devcontainer/policy/README.md:/workspace/README.md:ro
+      - ./output/runs:/workspace/output/runs
+      - ./output/storage:/workspace/output/storage
