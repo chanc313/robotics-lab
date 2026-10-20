@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 610" width="960" height="610" role="img" aria-labelledby="title desc">
+  <title id="title">Robotics-lab 管线：三个独立的闭环容器</title>
+  <desc id="desc">主机上的三个容器。sim 运行 G1 任务环境、全身控制、物理与任务判定，通过 ZMQ 向 policy 发送观测并取回 50 步动作块；policy 运行 GR00T N1.6 推理服务；dev 暂未进入回路，后续经 ROS 2 接入。三个容器共享 /data 与 /runs 两个数据目录。</desc>
+  <defs>
+    <style>
+      text { font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; fill: #1f2328; }
+      .h { font-size: 17px; font-weight: 700; }
+      .sub { font-size: 11.5px; fill: #5b6068; }
+      .item { font-size: 13px; }
+      .note { font-size: 12.5px; fill: #3d4450; }
+      .small { font-size: 11.5px; fill: #5b6068; }
+      .lab { font-size: 12.5px; font-weight: 600; fill: #3d4450; }
+    </style>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3d4450"/>
+    </marker>
+    <marker id="ahd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a94a6"/>
+    </marker>
+    <marker id="ahs" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a9e78"/>
+    </marker>
+  </defs>
+
+  <!-- card -->
+  <rect x="0.5" y="0.5" width="959" height="609" rx="16" fill="#fafaf7" stroke="#d9dbd3"/>
+  <text x="32" y="40" style="font-size:19px;font-weight:700">Robotics-lab 管线：三个独立的闭环容器</text>
+  <text x="32" y="63" class="sub" style="font-size:12.5px">当前形态：sim 与 policy 组成 G1 闭环，dev 暂未进入回路；容器之间只通过数据交互</text>
+
+  <!-- host frame -->
+  <rect x="20" y="80" width="920" height="432" rx="12" fill="none" stroke="#c9ccc3" stroke-dasharray="6 5"/>
+  <text x="36" y="102" class="small">主机 · Ubuntu 24.04 · Docker Compose 编排 · RTX 4080 Laptop（12 GB 显存）</text>
+
+  <!-- dev -->
+  <rect x="40" y="115" width="230" height="280" rx="10" fill="#f3f5f8" stroke="#8a94a6" stroke-width="1.5" stroke-dasharray="7 5"/>
+  <text x="56" y="143" class="h">dev</text>
+  <rect x="176" y="127" width="82" height="21" rx="10.5" fill="#e3e7ed"/>
+  <text x="217" y="142" text-anchor="middle" style="font-size:11px;fill:#4a5361">暂未进入回路</text>
+  <text x="56" y="165" class="sub">ROS 2 Jazzy · Clang 20 / C++26</text>
+  <text x="56" y="197" class="item">ROS 2 通信</text>
+  <text x="56" y="221" class="item">ros2_control 控制框架</text>
+  <text x="56" y="245" class="item">MoveIt 2 运动规划</text>
+  <text x="56" y="269" class="item">Nav2 导航</text>
+  <text x="56" y="293" class="item">MuJoCo 控制实验</text>
+  <line x1="56" y1="313" x2="254" y2="313" stroke="#d3d8e0"/>
+  <text x="56" y="337" class="note">后续：经 ROS 2 接入回路，</text>
+  <text x="56" y="357" class="note">开发 ROS 适配层与</text>
+  <text x="56" y="377" class="note">确定性控制核心</text>
+
+  <!-- dev to sim (planned) -->
+  <line x1="272" y1="250" x2="298" y2="250" stroke="#8a94a6" stroke-width="1.5" stroke-dasharray="4 3" marker-start="url(#ahd)" marker-end="url(#ahd)"/>
+
+  <!-- sim -->
+  <rect x="300" y="115" width="280" height="280" rx="10" fill="#eef6f1" stroke="#5a9e78" stroke-width="1.5"/>
+  <text x="316" y="143" class="h">sim</text>
+  <text x="316" y="165" class="sub">Isaac Sim 6.0 · Isaac Lab · Arena 0.3</text>
+
+  <rect x="330" y="180" width="234" height="40" rx="7" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="447" y="205" text-anchor="middle" class="item">Arena 任务环境：G1 取盒放箱</text>
+  <rect x="330" y="234" width="234" height="40" rx="7" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="447" y="259" text-anchor="middle" class="item">全身控制 WBC · 50 Hz</text>
+  <rect x="330" y="288" width="234" height="40" rx="7" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="447" y="313" text-anchor="middle" class="item">PhysX 物理仿真 · 200 Hz</text>
+  <rect x="330" y="342" width="234" height="40" rx="7" fill="#ffffff" stroke="#a9cdb8"/>
+  <text x="447" y="367" text-anchor="middle" class="item">任务判定 → 指标与报告</text>
+
+  <line x1="447" y1="220" x2="447" y2="233" stroke="#5a9e78" stroke-width="1.5" marker-end="url(#ahs)"/>
+  <line x1="447" y1="274" x2="447" y2="287" stroke="#5a9e78" stroke-width="1.5" marker-end="url(#ahs)"/>
+  <line x1="447" y1="328" x2="447" y2="341" stroke="#5a9e78" stroke-width="1.5" marker-end="url(#ahs)"/>
+  <path d="M330 308 H316 V200 H329" fill="none" stroke="#5a9e78" stroke-width="1.5" marker-end="url(#ahs)"/>
+
+  <!-- sim <-> policy -->
+  <line x1="564" y1="200" x2="698" y2="200" stroke="#3d4450" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="640" y="190" text-anchor="middle" class="lab">观测</text>
+  <text x="640" y="217" text-anchor="middle" class="small">图像 · 关节 · 指令</text>
+  <line x1="700" y1="254" x2="566" y2="254" stroke="#3d4450" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="640" y="244" text-anchor="middle" class="lab">动作块</text>
+  <text x="640" y="271" text-anchor="middle" class="small">50 步</text>
+  <text x="640" y="306" text-anchor="middle" class="small" style="font-weight:600">ZMQ</text>
+  <text x="640" y="323" text-anchor="middle" class="small">127.0.0.1:5555</text>
+
+  <!-- policy -->
+  <rect x="700" y="115" width="220" height="280" rx="10" fill="#f4f0fa" stroke="#8a6fc0" stroke-width="1.5"/>
+  <text x="716" y="143" class="h">policy</text>
+  <text x="716" y="165" class="sub">GR00T N1.6 · PyTorch 2.7</text>
+  <rect x="716" y="180" width="188" height="56" rx="7" fill="#ffffff" stroke="#c5b5e3"/>
+  <text x="810" y="203" text-anchor="middle" class="item" style="font-weight:600">GR00T 推理服务（VLA）</text>
+  <text x="810" y="224" text-anchor="middle" class="small">约每秒推理一次</text>
+  <text x="716" y="262" class="note">输入：头部相机图像、</text>
+  <text x="716" y="282" class="note">上身关节状态、语言指令</text>
+  <text x="716" y="310" class="note">输出：未来 50 步动作</text>
+  <text x="716" y="330" class="small">双臂、双手、腰、高度、行走</text>
+  <line x1="716" y1="348" x2="904" y2="348" stroke="#ddd3ee"/>
+  <text x="716" y="372" class="note">另含：微调与训练</text>
+
+  <!-- shared storage -->
+  <path d="M155 395 V411 M440 395 V411 M810 395 V411 M155 411 H810 M256 411 V428 M704 411 V428" fill="none" stroke="#b5b8ae" stroke-width="1.5"/>
+  <rect x="40" y="428" width="432" height="66" rx="9" fill="#f5f2e8" stroke="#cfc7a8"/>
+  <text x="58" y="455" class="item" style="font-weight:600">/data　共享数据（主机 output/storage）</text>
+  <text x="58" y="479" class="note">模型权重、数据集、资产</text>
+  <rect x="488" y="428" width="432" height="66" rx="9" fill="#f5f2e8" stroke="#cfc7a8"/>
+  <text x="506" y="455" class="item" style="font-weight:600">/runs　运行记录（主机 output/runs）</text>
+  <text x="506" y="479" class="note">日志、评估报告、训练产物</text>
+
+  <!-- legend -->
+  <line x1="36" y1="543" x2="76" y2="543" stroke="#3d4450" stroke-width="1.8" marker-end="url(#ah)"/>
+  <text x="86" y="547" class="small">当前回路中的数据流</text>
+  <line x1="226" y1="543" x2="266" y2="543" stroke="#8a94a6" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#ahd)"/>
+  <text x="276" y="547" class="small">后续规划</text>
+  <line x1="356" y1="543" x2="396" y2="543" stroke="#b5b8ae" stroke-width="1.5"/>
+  <text x="406" y="547" class="small">挂载共享目录</text>
+  <text x="36" y="578" class="small">频率：GR00T 约 1 Hz（每次 50 步，覆盖 1 秒）· 全身控制 50 Hz · 物理 200 Hz；一个 episode 最长 30 秒（1500 个控制步）</text>
+</svg>

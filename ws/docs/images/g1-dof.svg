@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" width="960" height="580" role="img" aria-labelledby="title desc">
+  <title id="title">Unitree G1 的 43 个自由度</title>
+  <desc id="desc">仿真用的 G1 模型共 43 个自由度：两条腿各 6、腰 3、两条手臂各 7、两只手各 7。头部有一个 RGB 相机。腿和腰由 AGILE 下身策略控制，手臂和手的目标来自 GR00T。</desc>
+  <defs>
+    <style>
+      text { font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; fill: #1f2328; }
+      .lab { font-size: 13px; font-weight: 600; }
+      .sub { font-size: 11.5px; fill: #5b6068; }
+      .cell { font-size: 13px; }
+      .head { font-size: 12.5px; font-weight: 700; fill: #3d4450; }
+    </style>
+  </defs>
+
+  <rect x="0.5" y="0.5" width="959" height="579" rx="16" fill="#fafaf7" stroke="#d9dbd3"/>
+  <text x="32" y="40" style="font-size:19px;font-weight:700">Unitree G1 的 43 个自由度</text>
+  <text x="32" y="63" class="sub" style="font-size:12.5px">仿真模型 g1_29dof_with_hand：身体 29 个 + 两只手各 7 个；正面视图，图中左侧是机器人的右侧</text>
+
+  <!-- body silhouette -->
+  <g stroke="#9aa3ae" stroke-width="10" stroke-linecap="round" fill="none">
+    <!-- arms -->
+    <path d="M196 158 L166 222 L152 282"/>
+    <path d="M284 158 L314 222 L328 282"/>
+    <!-- legs -->
+    <path d="M222 318 L216 412 L216 500"/>
+    <path d="M258 318 L264 412 L264 500"/>
+  </g>
+  <rect x="196" y="140" width="88" height="128" rx="18" fill="#e6e9ee" stroke="#9aa3ae" stroke-width="2"/>
+  <rect x="204" y="282" width="72" height="38" rx="12" fill="#e6e9ee" stroke="#9aa3ae" stroke-width="2"/>
+  <circle cx="240" cy="104" r="28" fill="#e6e9ee" stroke="#9aa3ae" stroke-width="2"/>
+  <rect x="226" y="98" width="28" height="12" rx="3" fill="#3d4450"/>
+  <!-- feet -->
+  <rect x="196" y="500" width="34" height="12" rx="4" fill="#9aa3ae"/>
+  <rect x="250" y="500" width="34" height="12" rx="4" fill="#9aa3ae"/>
+  <!-- hands -->
+  <g stroke="#8a6fc0" stroke-width="3" stroke-linecap="round">
+    <path d="M150 286 L142 306 M153 288 L152 310 M156 286 L162 304"/>
+    <path d="M330 286 L338 306 M327 288 L328 310 M324 286 L318 304"/>
+  </g>
+
+  <!-- joint dots -->
+  <g fill="#3f7fd0"><!-- arms -->
+    <circle cx="196" cy="158" r="7"/><circle cx="284" cy="158" r="7"/>
+    <circle cx="166" cy="222" r="6"/><circle cx="314" cy="222" r="6"/>
+    <circle cx="152" cy="282" r="6"/><circle cx="328" cy="282" r="6"/>
+  </g>
+  <g fill="#d39b2a"><circle cx="240" cy="274" r="8"/></g><!-- waist -->
+  <g fill="#3c9a64"><!-- legs -->
+    <circle cx="222" cy="318" r="7"/><circle cx="258" cy="318" r="7"/>
+    <circle cx="216" cy="412" r="6"/><circle cx="264" cy="412" r="6"/>
+    <circle cx="216" cy="496" r="6"/><circle cx="264" cy="496" r="6"/>
+  </g>
+
+  <!-- leader lines and labels: left side -->
+  <g stroke="#b5b8ae" stroke-width="1.2" fill="none">
+    <path d="M226 104 H120"/>
+    <path d="M232 274 H120"/>
+    <path d="M326 158 H372"/>
+    <path d="M340 300 H372"/>
+    <path d="M272 412 H372"/>
+  </g>
+  <text x="112" y="100" text-anchor="end" class="lab">头部相机</text>
+  <text x="112" y="117" text-anchor="end" class="sub">RGB 480×640</text>
+  <text x="112" y="270" text-anchor="end" class="lab" style="fill:#a8761a">腰 3</text>
+  <text x="112" y="287" text-anchor="end" class="sub">偏航、横滚、俯仰</text>
+  <text x="380" y="154" class="lab" style="fill:#2f66ad">手臂 7 × 2</text>
+  <text x="380" y="171" class="sub">肩 3、肘 1、腕 3</text>
+  <text x="380" y="296" class="lab" style="fill:#6a52a3">手 7 × 2</text>
+  <text x="380" y="313" class="sub">Dex3-1 三指手：拇指 3、食指 2、中指 2</text>
+  <text x="380" y="408" class="lab" style="fill:#2c7a4e">腿 6 × 2</text>
+  <text x="380" y="425" class="sub">髋 3、膝 1、踝 2</text>
+
+  <!-- table -->
+  <rect x="600" y="96" width="330" height="262" rx="10" fill="#ffffff" stroke="#d9dbd3"/>
+  <text x="620" y="124" class="head">部位</text>
+  <text x="700" y="124" class="head">自由度</text>
+  <text x="770" y="124" class="head">在这个 demo 里由谁控制</text>
+  <line x1="616" y1="134" x2="914" y2="134" stroke="#e3e5df"/>
+  <circle cx="626" cy="157" r="5" fill="#3c9a64"/><text x="638" y="162" class="cell">腿</text>
+  <text x="712" y="162" class="cell">12</text><text x="770" y="162" class="cell">AGILE 下身策略</text>
+  <circle cx="626" cy="191" r="5" fill="#d39b2a"/><text x="638" y="196" class="cell">腰</text>
+  <text x="716" y="196" class="cell">3</text><text x="770" y="196" class="cell">AGILE 下身策略</text>
+  <text x="770" y="212" class="sub">GR00T 也预测腰，但不执行</text>
+  <circle cx="626" cy="239" r="5" fill="#3f7fd0"/><text x="638" y="244" class="cell">手臂</text>
+  <text x="712" y="244" class="cell">14</text><text x="770" y="244" class="cell">GR00T，直接执行</text>
+  <circle cx="626" cy="273" r="5" fill="#8a6fc0"/><text x="638" y="278" class="cell">手</text>
+  <text x="712" y="278" class="cell">14</text><text x="770" y="278" class="cell">GR00T，直接执行</text>
+  <line x1="616" y1="294" x2="914" y2="294" stroke="#e3e5df"/>
+  <text x="638" y="320" class="cell" style="font-weight:700">合计</text>
+  <text x="712" y="320" class="cell" style="font-weight:700">43</text>
+  <text x="770" y="320" class="cell">GR00T 管 28 个</text>
+  <text x="770" y="338" class="sub">另加行走与高度指令</text>
+
+  <!-- notes -->
+  <text x="600" y="392" class="sub">· 真机 G1：身高 1.32 m、约 35 kg；基础版 23 个自由度，</text>
+  <text x="611" y="410" class="sub">EDU 版加装三指手、腰和腕的可选关节后最多 43 个。</text>
+  <text x="600" y="434" class="sub">· 真机还有深度相机和 3D 激光雷达，本 demo 只用头部相机。</text>
+  <text x="600" y="458" class="sub">· 偏航、横滚、俯仰：绕竖直轴、前后轴、左右轴的转动。</text>
+  <text x="32" y="552" class="sub">规格来源：Unitree 官网 G1 页面；关节名单来源：Arena 固定提交 8737b4c 的 43dof_joint_space.yaml</text>
+</svg>

@@ -71,7 +71,7 @@ ws/                              开发工作区
 - [项目目标与研究方向](ws/docs/PROJECT_GOALS.md)：长期目标、设计原则与分层架构设想
 - [路线图](ws/docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
 - [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：C++、Python、ROS 2、ros2_control、MuJoCo、MoveIt 2 与 Nav2
-- 学习材料：[G1 Demo 学习计划](ws/docs/LEARNING_PLAN.md)、[核心理论](ws/docs/CORE_CONCEPTS.md)、[ROS 2 入门](ws/docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](ws/docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[G1 / GR00T 配置导读](ws/docs/G1_GR00T_CONFIGS.md)、[项目启动与第一阶段](ws/docs/PROJECT_START.md)
+- 学习材料：[入门：机器人、任务与整条管线](ws/docs/G1_BASICS.md)、[G1 Demo 学习计划](ws/docs/LEARNING_PLAN.md)、[核心理论](ws/docs/CORE_CONCEPTS.md)、[ROS 2 入门](ws/docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](ws/docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[G1 / GR00T 配置导读](ws/docs/G1_GR00T_CONFIGS.md)、[项目启动与第一阶段](ws/docs/PROJECT_START.md)
 - [历史记录](ws/docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
 
 许可证：[LICENSE](LICENSE)。
