@@ -61,6 +61,9 @@ services:
       HF_HOME: /home/dev/.cache/huggingface
       # The image has no ~/.nv; keep the CUDA JIT cache on the persistent cache volume.
       CUDA_CACHE_PATH: /home/dev/.cache/nv/ComputeCache
+      # Isaac Lab mirrors remote USD assets into tempfile.gettempdir(); keep that mirror on the
+      # host so each run reuses it instead of downloading the scene again.
+      TMPDIR: /data/assets/downloads
     command: ["sleep", "infinity"]
     volumes:
       - ./ws/docs:/workspace/docs

@@ -6,7 +6,7 @@ cd "$project_dir"
 compose=(docker compose --project-directory "$project_dir" -f "$project_dir/compose.yaml")
 
 prepare() {
-    mkdir -p output/build output/runs/rl output/storage/{models,datasets,assets}
+    mkdir -p output/build output/runs/rl output/storage/{models,datasets,assets/downloads}
     if [[ ! -e .env ]]; then
         printf 'LOCAL_UID=%s\nLOCAL_GID=%s\nROS_DOMAIN_ID=0\n' "$(id -u)" "$(id -g)" > .env
         printf '# After accepting the Isaac Sim license, set OMNI_KIT_ACCEPT_EULA=YES and ACCEPT_EULA=Y.\n' >> .env
