@@ -1,6 +1,6 @@
-# 配置导读：GR00T 闭环配置与 G1 模态配置
+# 平台：GR00T 闭环配置与 G1 模态配置
 
-2026-10-19，配合 [学习计划](LEARNING_PLAN.md) Day 0 第 3 步。两份文件都来自 Arena 固定提交 `8737b4c`，在 sim 容器里位于 `/opt/arena/isaaclab_arena_gr00t/`（VS Code 的 sim 窗口用 **File: Open File...** 打开）：
+平台参考资料，逐字段说明 GR00T 闭环配置与 G1 模态配置；整体结构见 [平台设计](G1_DESIGN.md)，运行与细节索引见 [操作手册](G1_MANUAL.md)。两份文件都来自 Arena 固定提交 `8737b4c`，在 sim 容器里位于 `/opt/arena/isaaclab_arena_gr00t/`（VS Code 的 sim 窗口用 **File: Open File...** 打开）：
 
 - [G1 模态配置](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/embodiments/g1/g1_sim_wbc_data_config.py) `embodiments/g1/g1_sim_wbc_data_config.py`
 - [GR00T 闭环配置](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/policy/config/g1_locomanip_gr00t_closedloop_config.yaml) `policy/config/g1_locomanip_gr00t_closedloop_config.yaml`
@@ -53,7 +53,7 @@ GR00T 输出：7 个动作键 × 50 步，每步 35 个数           ← 模态�
 
 **和权重核对**：权重目录 `output/storage/models/arena-g1/checkpoint-20000/experiment_cfg/dataset_statistics.json` 中，action 各键维度正好是 7、7、7、7、3、1、3，state 是 7、7、7、7、3，与本文件一致。归一化统计也按这些键存储，所以键名和维度都不能随意改。
 
-同一文件还给出训练数据中指令量的范围，可以顺便看出这个任务"教"了机器人什么（推断，Day 3、Day 5 观察时验证）：
+同一文件还给出训练数据中指令量的范围，可以顺便看出这个任务"教"了机器人什么（推断，未逐项验证）：
 
 | 指令 | 含义 | 训练数据范围 |
 |---|---|---|
@@ -97,9 +97,3 @@ YAML 没写的字段用默认值，例如图像尺寸 480×640、种子 10。
 这 50 维交给 WBC 动作项 `g1_decoupled_wbc_joint_action.py`：上身关节目标直接做位置控制，行走速度和高度交给 AGILE 下身策略生成腿部动作。按代码，G1 当前使用的 AGILE 配置 `enable_waist=False`，腰被划在下身组里，所以 GR00T 预测的 3 个腰部目标实际不会被执行，腰由下身策略控制。
 
 执行由 `ActionChunkScheduler` 负责：缓存一块 50×50 的动作，每个 `env.step()` 取一行；50 行取完后再向服务端请求下一块。
-
-## 四、读完可以回答
-
-- GR00T 一次请求的输入有几样、各多大？输出每步多少个数，为什么到仿真里变成 50 个？
-- `action_chunk_length` 改成 25 会怎样？推理次数和对环境变化的反应各有什么变化？
-- 如果把 `pov_cam_name_sim` 换成另一个相机，模型还会正常工作吗？为什么？

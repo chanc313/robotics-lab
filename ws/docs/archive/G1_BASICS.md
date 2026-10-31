@@ -1,5 +1,7 @@
 # 入门：机器人、任务与整条管线
 
+> 已归档（2026-10-31）：早期材料，只作历史参考。当前文档见 [文档索引](../README.md)。
+
 2026-10-21。写给对这个项目没有任何概念的读者，也是[学习计划](LEARNING_PLAN.md) Day 0 的第一份材料。读完应该能回答三个问题：这是什么机器人、它要完成什么任务、一次运行从头到尾经过了哪些环节。代码和配置细节留给后面的日程。
 
 ## 一、机器人：Unitree G1
@@ -16,7 +18,7 @@ G1 是宇树科技（Unitree）的人形机器人。官网给出的主要规格�
 
 **自由度**是机器人能独立运动的方向数，对 G1 来说就是能独立驱动的关节数。仿真里用的是满配模型 `g1_29dof_with_hand`：身体 29 个自由度，加两只手各 7 个，一共 43 个。
 
-![Unitree G1 的 43 个自由度](images/g1-dof.svg)
+![Unitree G1 的 43 个自由度](../images/g1-dof.svg)
 
 | 部位 | 自由度 | 关节 |
 |---|---|---|
@@ -43,7 +45,7 @@ G1 是宇树科技（Unitree）的人形机器人。官网给出的主要规格�
 
 参与的有三个部分：policy 容器里的 GR00T 大模型、sim 容器里的仿真和控制、以及负责记录的评估程序。
 
-![G1 闭环：分层与时间尺度](images/g1-closed-loop.svg)
+![G1 闭环：分层与时间尺度](../images/g1-closed-loop.svg)
 
 1. **启动**：先在 policy 容器启动 GR00T 推理服务，它在本机的 5555 端口等待请求；再在 sim 容器启动评估程序，它连上推理服务。
 2. **重置**：Isaac Sim 搭好仓库、货架、盒子、箱子和 G1，机器人站在起点。
@@ -60,13 +62,13 @@ G1 是宇树科技（Unitree）的人形机器人。官网给出的主要规格�
 
 ## 四、三个容器各做什么
 
-![Robotics-lab 管线](images/pipeline.svg)
+![Robotics-lab 管线](../images/pipeline.svg)
 
 - **sim**：Isaac Sim 物理仿真与渲染、Isaac Lab 环境、Arena 任务与评估，全身控制器也在这里。上面第 2–5 步都发生在 sim 的同一个进程里。
 - **policy**：GR00T 推理服务，以及以后的模型微调和训练。它只通过网络端口和 sim 交流，所以也可以搬到云端。
 - **dev**：ROS 2、控制与规划工具、C++ / Python 开发。在这个 demo 里还没有参与，以后负责 ROS 接口和确定性控制核心。
 
-三个容器之间只通过数据交互：共享的模型与数据目录、运行记录目录，以及网络端点。详见各容器自己的说明和[容器指南](CONTAINERS.md)。
+三个容器之间只通过数据交互：共享的模型与数据目录、运行记录目录，以及网络端点。详见各容器自己的说明和[容器指南](../CONTAINERS.md)。
 
 ## 五、名词表
 
@@ -86,4 +88,4 @@ G1 是宇树科技（Unitree）的人形机器人。官网给出的主要规格�
 
 - Unitree G1 规格：Unitree 官网 G1 页面（2026-10-21 查阅）。
 - 关节名单与顺序：Arena 固定提交 `8737b4c` 的 `isaaclab_arena_gr00t/embodiments/g1/43dof_joint_space.yaml`。
-- 相机、场景、频率与成功条件：同一提交的 `isaaclab_arena/embodiments/g1/g1.py`、`isaaclab_arena_environments/galileo_g1_locomanip_pick_and_place_environment.py` 与任务判定代码；更细的字段见[配置导读](G1_GR00T_CONFIGS.md)。
+- 相机、场景、频率与成功条件：同一提交的 `isaaclab_arena/embodiments/g1/g1.py`、`isaaclab_arena_environments/galileo_g1_locomanip_pick_and_place_environment.py` 与任务判定代码；更细的字段见[配置导读](../platform/G1_GR00T_CONFIGS.md)。

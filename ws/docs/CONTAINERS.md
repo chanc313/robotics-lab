@@ -4,7 +4,7 @@ ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GP
 
 ## 三个容器
 
-三个容器相互独立，各自在内部形成闭环：不依赖另外两个，也能单独构建、运行和验证，因此可以分别复用到其他项目。它们之间只通过数据交互：共享的 `/data`（模型、数据集、资产）、`/runs`（日志、checkpoint、报告），以及网络端点（目前只有 sim 与 policy 之间的 GR00T 推理服务）。跨容器的接口还没有设计，见 [路线图](ROADMAP.md) 第 2 步。
+三个容器相互独立，各自在内部形成闭环：不依赖另外两个，也能单独构建、运行和验证，因此可以分别复用到其他项目。它们之间只通过数据交互：共享的 `/data`（模型、数据集、资产）、`/runs`（日志、checkpoint、报告），以及网络端点（目前只有 sim 与 policy 之间的 GR00T 推理服务）。跨容器的接口还没有设计，见 [项目计划](PROJECT_PLAN.md#推进顺序) 的接口契约一步。
 
 每个容器有自己的 README，打开该容器时显示为 `/workspace/README.md`（主机源文件在 `.devcontainer/<容器>/README.md`），内容包括镜像内容、闭环功能与自检命令、挂载约定、单独复用时需要带走的文件，以及目前在 G1 项目中的角色。概览如下：
 
@@ -23,7 +23,7 @@ ROS、Isaac、模型与训练都在容器中运行；主机只负责 Docker、GP
 ./scripts/lab build             # 或只构建其中一个：./scripts/lab build dev
 ```
 
-`prepare` 创建 `output/storage/{models,datasets,assets}` 与 `output/runs/rl`，并在 `.env` 不存在时写入当前 UID/GID 和默认 ROS domain，已有 `.env` 不覆盖。这些目录必须由当前用户创建：缺失的绑定目录会被 Docker 以 root 身份自动创建，容器内的 `dev` 用户随后无法写入。
+`prepare` 创建 `output/storage/{models,datasets,assets/downloads}` 与 `output/runs/rl`，并在 `.env` 不存在时写入当前 UID/GID 和默认 ROS domain，已有 `.env` 不覆盖。这些目录必须由当前用户创建：缺失的绑定目录会被 Docker 以 root 身份自动创建，容器内的 `dev` 用户随后无法写入。
 
 构建配置集中在 `compose.yaml`：
 
@@ -162,7 +162,7 @@ hf download nvidia/GN1x-Tuned-Arena-G1-Loco-Manipulation \
 
 `g1-evaluate` 打开 Kit 窗口运行一个 episode。不需要窗口时，在 `sim` 中运行同一条 `policy_runner.py` 命令并把 `--viz kit` 换成 `--headless`。
 
-本机（RTX 4080 Laptop 12 GB、30 GB 内存）2026-10-13 的实测：GR00T 服务约 30 秒就绪、占显存约 6.2 GB；无界面评估时整机显存峰值约 10.7 GB、内存峰值约 20 GB，一个 episode（最长 1500 步、30 秒仿真时间）墙钟约 12 分钟，首次运行还要从 NVIDIA 资产库下载场景模型。`--record_viewport_video` 会把整段画面留在内存里，录满 1500 步的 episode 时进程涨到约 18 GB 并被系统 OOM 杀掉，在本机录像只适合短运行。
+本机（RTX 4080 Laptop 12 GB、30 GB 内存）2026-10-13 的实测：GR00T 服务约 30 秒就绪、占显存约 6.2 GB；无界面评估时整机显存峰值约 10.7 GB、内存峰值约 20 GB，一个 episode（最长 1500 步、30 秒仿真时间）墙钟约 12 分钟。场景资产从 NVIDIA 资产库下载，Isaac Lab 把它们镜像到 `tempfile.gettempdir()`；sim 容器的 `TMPDIR` 指向 `/data/assets/downloads`（主机 `output/storage/assets/downloads`，约 1.4 GB），只在第一次运行时下载。2026-10-31 之前它落在容器的 `/tmp`，每次运行都重新下载，启动要 15–30 分钟；缓存后从启动到开始执行约 40 秒。`--record_viewport_video` 会把整段画面留在内存里，录满 1500 步的 episode 时进程涨到约 18 GB 并被系统 OOM 杀掉，在本机录像只适合短运行。
 
 仿真与模型共享本机约 12 GB 显存；需要时把 `policy` 放到远程 GPU，评估端用 `--remote_host`、`--remote_port` 指向它。`sim`、`policy` 使用 `ipc: host`，满足 dataloader 与分布式训练的共享内存需求。
 

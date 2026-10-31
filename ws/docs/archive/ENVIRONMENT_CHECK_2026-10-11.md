@@ -16,7 +16,7 @@
 | Python / 安装包 | Python 3.12.15；Sim 6.0.1.0；Lab 6.1.17；Arena 0.3.0；Torch 2.11.0+cu128 |
 | ROS 2 | 加载 Jazzy 环境后，`rviz2` 包和 `rclpy` 可找到；本次未重复消息或时钟桥接验收 |
 | Arena 固定版本 | `8737b4ceb25f99f81a81786b7fde73139b52f324`，工作树干净 |
-| 子模块与锁文件 | 与 [项目启动](../PROJECT_START.md) 的固定值一致 |
+| 子模块与锁文件 | 与 [项目启动](PROJECT_START.md) 的固定值一致 |
 | GUI / GPU 物理检查 | Vulkan 中 NVIDIA GPU 标记 Active；Kit 应用启动完成；cuda:0 环境运行 200/200 步；进程退出码 0 |
 | 错误扫描 | `[Error]`、`Traceback`、NVML 版本不匹配、设备创建失败的匹配数均为 0 |
 

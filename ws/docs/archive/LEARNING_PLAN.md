@@ -1,6 +1,8 @@
 # G1 Demo 学习计划
 
-2026-10-13 起草，2026-10-21 定版。官方 G1 demo 已在本机跑通（[运行记录](CONTAINERS.md#5-rl-训练与模型服务)、[路线图](ROADMAP.md)第 1 步）。本页先用一页讲清这个 demo 的宏观思想，再按天安排从零开始的学习：Day 0 是入门，Day 1–5 学 demo 和框架工具，最后是数据与训练的扩展，以及以后设计新架构、新算法时的切入点。2026-10-19 起，每天按最小闭环、至少看完、选做三档安排，本项目每天约 2 小时 50 分钟。
+> 已归档（2026-10-31）：早期材料，只作历史参考。当前文档见 [文档索引](../README.md)。
+
+2026-10-13 起草，2026-10-21 定版。官方 G1 demo 已在本机跑通（[运行记录](../CONTAINERS.md#5-rl-训练与模型服务)、[路线图](ROADMAP.md)第 1 步）。本页先用一页讲清这个 demo 的宏观思想，再按天安排从零开始的学习：Day 0 是入门，Day 1–5 学 demo 和框架工具，最后是数据与训练的扩展，以及以后设计新架构、新算法时的切入点。2026-10-19 起，每天按最小闭环、至少看完、选做三档安排，本项目每天约 2 小时 50 分钟。
 
 文中的上游文件都来自固定提交 `8737b4c`，可以在 GitHub 上看，也可以在 sim 容器里打开 `/opt/arena/` 下的同名文件（VS Code 的 sim 窗口用 **File: Open File...**）。
 
@@ -12,7 +14,7 @@ G1 人形机器人站在仿真仓库里，看着头部相机画面、拿着一�
 
 ### 分层与时间尺度
 
-![G1 闭环：分层与时间尺度](images/g1-closed-loop.svg)
+![G1 闭环：分层与时间尺度](../images/g1-closed-loop.svg)
 
 | 层 | 频率 | 做什么 | 在哪里 |
 |---|---|---|---|
@@ -78,8 +80,8 @@ Arena 的 G1 教程分五步：环境准备 → 遥操作采集示范 → Mimic 
 **至少看完（约 50 分钟）**：
 
 - [入门：机器人、任务与整条管线](G1_BASICS.md)：G1 的规格和 43 个自由度、任务与成功条件、一次 episode 的完整流程、三个容器的分工、名词表。（25 分钟）
-- 本页第一部分"宏观图景"，重点对照[分层图](images/g1-closed-loop.svg)：每层做什么、多快、在哪个容器。（10 分钟）
-- [配置导读](G1_GR00T_CONFIGS.md)：两份配置各管哪一段，GR00T 的输入输出，35 维怎样变成 50 维。原文在 sim 容器的 `/opt/arena/isaaclab_arena_gr00t/`，可以对照着看。（15 分钟）
+- 本页第一部分"宏观图景"，重点对照[分层图](../images/g1-closed-loop.svg)：每层做什么、多快、在哪个容器。（10 分钟）
+- [配置导读](../platform/G1_GR00T_CONFIGS.md)：两份配置各管哪一段，GR00T 的输入输出，35 维怎样变成 50 维。原文在 sim 容器的 `/opt/arena/isaaclab_arena_gr00t/`，可以对照着看。（15 分钟）
 
 **理解检查**：
 
@@ -167,7 +169,7 @@ Arena 的 G1 教程分五步：环境准备 → 遥操作采集示范 → Mimic 
 **至少看完（约 1 小时 40 分钟）**：
 
 - [关节目标型 WBC 动作项](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_g1/g1_env/mdp/actions/g1_decoupled_wbc_joint_action.py#L39)：`action_dim` = 43 + 3 + 1 + 3；上身关节直接位置控制，下身用 AGILE 策略；找到腰为什么归下身。（40 分钟）
-- `isaaclab_arena_gr00t/embodiments/g1/43dof_joint_space.yaml`（sim 容器 `/opt/arena/` 下）：43 个关节的名字和顺序；再对照 [配置导读](G1_GR00T_CONFIGS.md#三50-维动作从哪里来) 第三节。（15 分钟）
+- `isaaclab_arena_gr00t/embodiments/g1/43dof_joint_space.yaml`（sim 容器 `/opt/arena/` 下）：43 个关节的名字和顺序；再对照 [配置导读](../platform/G1_GR00T_CONFIGS.md#三50-维动作从哪里来) 第三节。（15 分钟）
 - [G1 机器人定义](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena/embodiments/g1/g1.py)：找到 `g1_wbc_joint` 与 `g1_wbc_pink` 两种动作配置并比较。（25 分钟）
 - AGILE 下身策略 `isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/policy/g1_agile_policy.py`：输入哪些观测和指令、输出什么、ONNX 模型在哪里加载。（20 分钟）
 
@@ -197,7 +199,7 @@ Arena 的 G1 教程分五步：环境准备 → 遥操作采集示范 → Mimic 
 
 **目标**：把各层串起来，学会用实验而不是单次运行下结论。每个无界面 episode 约 12 分钟，等待时可以做总结。
 
-**最小闭环（必做，操作约 30 分钟，另需等待约 12 分钟）**：先启动推理服务，再按[容器指南](CONTAINERS.md#5-rl-训练与模型服务)的无界面方式跑一个 episode（也可以由我代为运行）；在 `episode_results_rank0.jsonl` 里读出事件时间线，和 Day 0 的两次运行比较。
+**最小闭环（必做，操作约 30 分钟，另需等待约 12 分钟）**：先启动推理服务，再按[容器指南](../CONTAINERS.md#5-rl-训练与模型服务)的无界面方式跑一个 episode（也可以由我代为运行）；在 `episode_results_rank0.jsonl` 里读出事件时间线，和 Day 0 的两次运行比较。
 
 **单变量实验（必做，约 50 分钟，含一次等待）**：只改一个变量再跑一次，例如 `--seed`，或者用 `--language_instruction` 改写指令的措辞。先预测结果，再比较事件时间线。
 

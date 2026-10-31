@@ -56,4 +56,4 @@
 
 ## 目前在 G1 项目中的角色
 
-尚未进入 G1 回路。`src/ros` 预留给 ROS 适配层：按路线图先旁路观察 sim 中 Isaac 发布的状态，再让 ROS 进入回路。ros2_control、MoveIt 2、Nav2、MuJoCo 目前服务于个人技术栈的学习。
+尚未进入 G1 回路。`src/ros` 预留给 ROS 适配层：按项目计划先旁路观察 sim 中 Isaac 发布的状态，再让 ROS 进入回路。ros2_control、MoveIt 2、Nav2、MuJoCo 目前服务于个人技术栈的学习。

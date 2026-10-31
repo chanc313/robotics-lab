@@ -66,7 +66,7 @@ ros2 launch hello_py hello.launch.py                   # 持续运行，Ctrl+C �
 
 也可以在两个终端分别运行 `ros2 run hello_cpp talker`、`ros2 run hello_py listener`，再用 `ros2 node list`、`ros2 topic info /hello`、`ros2 topic echo /hello` 观察。VS Code 任务 `ROS sandbox: build` 与 `ROS sandbox: self-check` 执行同样的命令；默认 Dev Container 为 C/C++ 扩展加入了 `/opt/ros/jazzy/include`，ROS 头文件可以被识别。
 
-这里只验证 `dev` 容器内的 ROS 通信；与 `sim`、`policy` 的连接属于路线图后续步骤。项目自己的 ROS 包放 `src/ros`，构建到 `/build/ros`。
+这里只验证 `dev` 容器内的 ROS 通信；与 `sim`、`policy` 的连接属于项目计划的后续步骤。项目自己的 ROS 包放 `src/ros`，构建到 `/build/ros`。
 
 ## ros2_control 与 MuJoCo
 

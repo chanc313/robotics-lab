@@ -1,6 +1,8 @@
 # ROS 2 入门：从 `rossrc` 的两个节点讲起
 
-2026-10-12。配合 [学习沙盒工具链](TOOLCHAIN.md#ros-2rossrc) 的 `rossrc/` 示例阅读，所有命令在 `dev` 容器中执行。
+> 已归档（2026-10-31）：早期材料，只作历史参考。当前文档见 [文档索引](../README.md)。
+
+2026-10-12。配合 [学习沙盒工具链](../TOOLCHAIN.md#ros-2rossrc) 的 `rossrc/` 示例阅读，所有命令在 `dev` 容器中执行。
 
 ## 1. ROS 2 解决什么问题
 
@@ -101,7 +103,7 @@ ROS 代码以**包 package** 为单位组织，每个包有 `package.xml` 声明
 
 ## 8. 动手练习
 
-先构建并 source（见 [工具链](TOOLCHAIN.md#ros-2rossrc)），然后在多个 `dev` 终端中操作：
+先构建并 source（见 [工具链](../TOOLCHAIN.md#ros-2rossrc)），然后在多个 `dev` 终端中操作：
 
 1. 终端 A 运行 `ros2 run hello_cpp talker`，终端 B 运行 `ros2 run hello_py listener`，观察日志一一对应。
 2. 终端 C 依次运行，理解通信图：

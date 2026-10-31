@@ -1,8 +1,10 @@
 # Isaac GUI 入门与 policy_runner 管线
 
+> 已归档（2026-10-31）：早期材料，只作历史参考。当前文档见 [文档索引](../README.md)。
+
 2026-10-11。依据本机固定的 Arena 提交 `8737b4ceb25f99f81a81786b7fde73139b52f324`、其 Isaac Lab / GR00T 子模块和本次运行日志核对。
 
-当前使用容器入口，Isaac GUI 与无界面运行共用 `sim` 镜像。迁移前的 [驱动故障诊断](archive/ISAAC_DRIVER_DIAGNOSIS_2026-10-11.md) 与 [主机复核](archive/ENVIRONMENT_CHECK_2026-10-11.md) 已归档；安装历史与本轮精简状态见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)。
+当前使用容器入口，Isaac GUI 与无界面运行共用 `sim` 镜像。迁移前的 [驱动故障诊断](ISAAC_DRIVER_DIAGNOSIS_2026-10-11.md) 与 [主机复核](ENVIRONMENT_CHECK_2026-10-11.md) 已归档；安装历史与本轮精简状态见 [迁移记录](CONTAINER_MIGRATION_2026-10-11.md)。
 
 ## 1. 先认识这几层
 
@@ -14,7 +16,7 @@
 | GR00T | 根据图像、机器人状态和语言指令预测动作；当前计划通过独立策略服务接入 |
 | ROS 2 | 后续消息与设备集成；下面两个 GUI 教程不需要先启动 ROS |
 
-当前项目全面容器化。先按 [容器指南](CONTAINERS.md) 构建或拉取镜像，以下命令在 Linux 主机终端调用 Docker，实际 Isaac 程序运行在 `sim` 容器内。不要在 `>>>` Python 提示符里输入。
+当前项目全面容器化。先按 [容器指南](../CONTAINERS.md) 构建或拉取镜像，以下命令在 Linux 主机终端调用 Docker，实际 Isaac 程序运行在 `sim` 容器内。不要在 `>>>` Python 提示符里输入。
 
 ## 2. 保留当前 Arena 场景窗口
 
@@ -171,7 +173,7 @@ Arena 图像 + 机器人状态 + 语言任务
   → 新图像与状态，进入下一轮
 ```
 
-返回动作块不意味着一次 `env.step()` 执行整个块；runner 每次获取当前动作并推进一个环境控制步。客户端源码见 [gr00t_remote_closedloop_policy.py](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/policy/gr00t_remote_closedloop_policy.py)。GR00T 容器安装状态见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)；权重、数据和通信闭环在后续阶段准备，前述方块与 Franka 教程不依赖它们。
+返回动作块不意味着一次 `env.step()` 执行整个块；runner 每次获取当前动作并推进一个环境控制步。客户端源码见 [gr00t_remote_closedloop_policy.py](https://github.com/isaac-sim/IsaacLab-Arena/blob/8737b4ceb25f99f81a81786b7fde73139b52f324/isaaclab_arena_gr00t/policy/gr00t_remote_closedloop_policy.py)。GR00T 容器安装状态见 [迁移记录](CONTAINER_MIGRATION_2026-10-11.md)；权重、数据和通信闭环在后续阶段准备，前述方块与 Franka 教程不依赖它们。
 
 ## 6. 接下来怎样开发
 

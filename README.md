@@ -1,10 +1,10 @@
 # Robotics lab
 
-长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS 与控制，全部在容器中开发和运行。当前起点是复现 **Isaac Lab-Arena × GR00T N1.6 的 Unitree G1 移动双臂**流程，再在其上优化与迭代；推进顺序见 [路线图](ws/docs/ROADMAP.md)。
+长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS 与控制，全部在容器中开发和运行。实验平台是 NVIDIA 开源的 **Isaac Lab-Arena × GR00T N1.6 Unitree G1 移动操作 demo**，项目在其上二次开发，目标是一套 AI 只负责决策、物理安全由确定性层保证的模块化机器人架构；目标见 [项目目标](ws/docs/PROJECT_GOALS.md)，推进顺序见 [项目计划](ws/docs/PROJECT_PLAN.md)。
 
 ## 三个容器
 
-三个容器相互独立、各自在内部闭环，不依赖彼此即可单独运行和验证；它们之间只通过数据交互（共享的 `/data`、`/runs` 与网络端点），跨容器接口留待[路线图](ws/docs/ROADMAP.md)第 2 步设计。版本全部固定。
+三个容器相互独立、各自在内部闭环，不依赖彼此即可单独运行和验证；它们之间只通过数据交互（共享的 `/data`、`/runs` 与网络端点），跨容器接口留待[项目计划](ws/docs/PROJECT_PLAN.md)中的接口契约设计。版本全部固定。
 
 | 容器 | 闭环功能（纯净骨架） | 目前在 G1 项目中的角色 |
 |---|---|---|
@@ -25,7 +25,7 @@ docker/                          三个 Dockerfile、入口与检查脚本、上
 scripts/lab                      主机上的唯一启动器（构建、发布、各类运行入口）
 output/                          运行产物（Git 忽略）：build → /build，runs → /runs，storage → /data
 ws/                              开发工作区
-  docs/                          指南、学习材料、路线图（三个容器都挂载）
+  docs/                          项目目标与计划、平台说明、指南（三个容器都挂载）
   src/ai/                        模型、模仿学习与 RL 算法（policy）
   src/ros/                       ROS 2 包与节点（dev）
   src/simulation/                Isaac 任务、环境与仿真适配（sim）
@@ -62,16 +62,27 @@ ws/                              开发工作区
 ./scripts/lab g1-evaluate     # G1 闭环评估，连接已运行的推理服务
 ```
 
-这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [路线图](ws/docs/ROADMAP.md)。
+这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [项目计划](ws/docs/PROJECT_PLAN.md)。
 
 ## 文档
 
+项目本身：
+
+- [项目目标](ws/docs/PROJECT_GOALS.md)：长期目标、设计原则、分层架构与模块化实现设想、开发边界
+- [项目计划](ws/docs/PROJECT_PLAN.md)：现状、推进顺序、开发中的理论缺口、已定的长期决定
+- [Demo 方案](ws/docs/DEMO_PLAN.md)：安全审计层的四天方案（候选的第一块砖之一）
+
+实验平台（上游 G1 demo，只作为起点）：
+
+- [平台设计](ws/docs/platform/G1_DESIGN.md)：机器人与任务、整体分工、VLA 架构、下身控制器、仿真与评估
+- [操作手册](ws/docs/platform/G1_MANUAL.md)：运行、本机实测、已知局限、接入点与细节索引
+- [配置说明](ws/docs/platform/G1_GR00T_CONFIGS.md)：GR00T 闭环配置与 G1 模态配置逐字段说明
+
+环境与开发：
+
 - [容器指南](ws/docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
 - [开发指南](ws/docs/DEVELOPMENT.md)：仓库结构、模块约定、依赖规则、接口与测试的时机
-- [项目目标与研究方向](ws/docs/PROJECT_GOALS.md)：长期目标、设计原则与分层架构设想
-- [路线图](ws/docs/ROADMAP.md)：闭环推进顺序与已定的长期决定
 - [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：C++、Python、ROS 2、ros2_control、MuJoCo、MoveIt 2 与 Nav2
-- 学习材料：[入门：机器人、任务与整条管线](ws/docs/G1_BASICS.md)、[G1 Demo 学习计划](ws/docs/LEARNING_PLAN.md)、[核心理论](ws/docs/CORE_CONCEPTS.md)、[ROS 2 入门](ws/docs/ROS_BASICS.md)、[Isaac GUI 与 policy_runner](ws/docs/ISAAC_GUI_AND_POLICY_RUNNER.md)、[G1 / GR00T 配置导读](ws/docs/G1_GR00T_CONFIGS.md)、[项目启动与第一阶段](ws/docs/PROJECT_START.md)
-- [历史记录](ws/docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查
+- [归档](ws/docs/archive/)：早期的学习计划、路线图与入门材料，环境检查、驱动诊断、容器迁移、骨架审查记录
 
 许可证：[LICENSE](LICENSE)。
