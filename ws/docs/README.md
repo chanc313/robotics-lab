@@ -9,6 +9,6 @@
 | [容器指南](CONTAINERS.md) | 三个容器的构建、启动、通信、数据与发布 |
 | [开发指南](DEVELOPMENT.md) | 仓库结构、模块约定、依赖规则、接口与测试的时机 |
 | [学习沙盒工具链](TOOLCHAIN.md) | `dev` 容器里的 C++、Python、ROS 2、ros2_control、MuJoCo、MoveIt 2 与 Nav2 |
-| [archive/](archive/) | 早期的学习计划、路线图、入门材料与环境记录，只作历史参考 |
+| [archive/](archive/) | 环境检查、驱动诊断、容器迁移、骨架审查等早期记录，只作历史参考 |
 
 平台说明只描述起点；项目的工作是把平台逐步改造成项目目标中的架构。

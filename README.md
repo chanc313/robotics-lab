@@ -62,7 +62,7 @@ ws/                              开发工作区
 ./scripts/lab g1-evaluate     # G1 闭环评估，连接已运行的推理服务
 ```
 
-这些入口提供启动方式，不代表对应流程已经验收；当前进度见 [项目计划](ws/docs/PROJECT_PLAN.md)。
+这些入口提供启动方式，不代表对应流程都已验证；当前进度见 [项目计划](ws/docs/PROJECT_PLAN.md)。
 
 ## 文档
 
@@ -83,6 +83,6 @@ ws/                              开发工作区
 - [容器指南](ws/docs/CONTAINERS.md)：构建、IDE、启动、跨容器通信、数据与缓存、镜像发布
 - [开发指南](ws/docs/DEVELOPMENT.md)：仓库结构、模块约定、依赖规则、接口与测试的时机
 - [学习沙盒工具链](ws/docs/TOOLCHAIN.md)：C++、Python、ROS 2、ros2_control、MuJoCo、MoveIt 2 与 Nav2
-- [归档](ws/docs/archive/)：早期的学习计划、路线图与入门材料，环境检查、驱动诊断、容器迁移、骨架审查记录
+- [归档](ws/docs/archive/)：环境检查、驱动诊断、容器迁移、骨架审查等早期记录
 
 许可证：[LICENSE](LICENSE)。
