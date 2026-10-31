@@ -74,7 +74,7 @@ ws/                              开发工作区
 
 实验平台（上游 G1 demo，只作为起点）：
 
-- [平台设计](ws/docs/platform/G1_DESIGN.md)：机器人与任务、整体分工、VLA 架构、下身控制器、仿真与评估
+- [平台设计](ws/docs/platform/G1_DESIGN.md)：分七站讲清平台：整体分工、VLA 怎么看和想、VLA 怎么动、全身控制与 AGILE、Isaac 三层、数据与训练、一秒钟里的闭环
 - [操作手册](ws/docs/platform/G1_MANUAL.md)：运行、本机实测、已知局限、接入点与细节索引
 - [配置说明](ws/docs/platform/G1_GR00T_CONFIGS.md)：GR00T 闭环配置与 G1 模态配置逐字段说明
 
