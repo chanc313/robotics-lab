@@ -32,6 +32,8 @@ services:
     working_dir: /workspace
     command: ["sleep", "infinity"]
     volumes:
+      # Read-only copy of the host launcher for reading; scripts/lab itself runs only on the host.
+      - ./scripts:/workspace/scripts:ro
       - ./ws/docs:/workspace/docs
       - ./ws/src/ros:/workspace/src/ros
       - ./ws/cppsrc:/workspace/cppsrc

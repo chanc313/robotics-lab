@@ -38,6 +38,7 @@
 | `/workspace/docs` | 项目文档（三个容器共享） |
 | `/workspace/src/ros` | 项目的 ROS 2 包（colcon 源码根） |
 | `/workspace/cppsrc`、`pythonsrc`、`rossrc` | C++ / Python / ROS 2 学习沙盒 |
+| `/workspace/scripts` | 主机启动器 `scripts/lab` 的只读副本，只供查看；它调用 Docker Compose，必须在主机终端运行 |
 | `/workspace/.vscode` | 本容器的 VS Code 设置、任务与调试配置 |
 | `/build` | 构建产物（cppsrc、rossrc、ros 各一个子目录） |
 | `/data`、`/runs` | 共享的模型数据与运行记录 |

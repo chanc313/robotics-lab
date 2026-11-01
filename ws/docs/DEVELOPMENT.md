@@ -6,12 +6,12 @@
 
 仓库分两层：
 
-- **仓库根目录**（只在主机上使用）：`compose*.yaml`、`docker/`、`.devcontainer/`、`scripts/lab`、`.env*`、`LICENSE`、`README.md`，以及运行产物目录 `output/`。Git 只在主机上操作。
+- **仓库根目录**（只在主机上使用）：`compose*.yaml`、`docker/`、`.devcontainer/`、`scripts/lab`、`.env*`、`LICENSE`、`README.md`，以及运行产物目录 `output/`。Git 只在主机上操作。项目因此不是纯容器化的：主机上保留 Docker、GPU 驱动和启动器 `scripts/lab`，启动器调用 Docker Compose，容器里没有 Docker，只能在主机终端运行；dev 容器以只读方式挂载一份 `scripts/` 供查看。
 - **`ws/` 开发工作区**：`docs/`、`src/`、`experiments/` 与三个学习沙盒。每个容器只把属于自己的目录挂载到 `/workspace`：
 
 | 容器 | `/workspace` 下的内容 | 其他挂载 |
 |---|---|---|
-| dev | `docs/`、`src/ros/`、`cppsrc/`、`pythonsrc/`、`rossrc/` | `/build`（构建产物）、`/data`、`/runs` |
+| dev | `docs/`、`src/ros/`、`cppsrc/`、`pythonsrc/`、`rossrc/`、`scripts/`（只读） | `/build`（构建产物）、`/data`、`/runs` |
 | sim | `docs/`、`src/simulation/`、`experiments/` | `/data`、`/runs` |
 | policy | `docs/`、`src/ai/`、`experiments/` | `/data`、`/runs` |
 

@@ -1,6 +1,6 @@
 # Robotics lab
 
-长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS 与控制，全部在容器中开发和运行。实验平台是 NVIDIA 开源的 **Isaac Lab-Arena × GR00T N1.6 Unitree G1 移动操作 demo**，项目在其上二次开发，目标是一套 AI 只负责决策、物理安全由确定性层保证的模块化机器人架构；目标见 [项目目标](ws/docs/PROJECT_GOALS.md)，推进顺序见 [项目计划](ws/docs/PROJECT_PLAN.md)。
+长期维护的 Embodied AI 研究骨架：上层 AI 与强化学习、Isaac 仿真、中层 ROS 与控制，全部在容器中开发和运行；主机上只保留一个很小的启动器 `scripts/lab`，它调用 Docker Compose 启动各容器，因此只能在主机终端运行。实验平台是 NVIDIA 开源的 **Isaac Lab-Arena × GR00T N1.6 Unitree G1 移动操作 demo**，项目在其上二次开发，目标是一套 AI 只负责决策、物理安全由确定性层保证的模块化机器人架构；目标见 [项目目标](ws/docs/PROJECT_GOALS.md)，推进顺序见 [项目计划](ws/docs/PROJECT_PLAN.md)。
 
 ## 三个容器
 
@@ -22,7 +22,7 @@
 compose.yaml, compose.gui.yaml   三个服务、各容器的挂载、共享构建参数、GUI 叠加
 docker/                          三个 Dockerfile、入口与检查脚本、上游固定版本、模型依赖锁
 .devcontainer/                   三个 VS Code 容器配置、各自的编辑器设置、共享 Ruff 规则
-scripts/lab                      主机上的唯一启动器（构建、发布、各类运行入口）
+scripts/lab                      主机上的唯一启动器（构建、发布、各类运行入口），只能在主机运行
 output/                          运行产物（Git 忽略）：build → /build，runs → /runs，storage → /data
 ws/                              开发工作区
   docs/                          项目目标与计划、平台说明、指南（三个容器都挂载）
