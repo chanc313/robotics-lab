@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 580" width="960" height="580" role="img" aria-labelledby="title desc">
   <title id="title">Unitree G1 的 43 个自由度</title>
-  <desc id="desc">仿真用的 G1 模型共 43 个自由度：两条腿各 6、腰 3、两条手臂各 7、两只手各 7。头部有一个 RGB 相机。腿和腰由 AGILE 下身策略控制，手臂和手的目标来自 GR00T。</desc>
+  <desc id="desc">仿真用的 G1 模型共 43 个自由度：两条腿各 6、腰 3、两条手臂各 7、两只手各 7。头部有一个 RGB 相机。腿由 AGILE 下身策略控制，腰的目标固定为 0，手臂和手的目标来自 GR00T。</desc>
   <defs>
     <style>
       text { font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; fill: #1f2328; }
@@ -78,7 +78,7 @@
   <circle cx="626" cy="157" r="5" fill="#3c9a64"/><text x="638" y="162" class="cell">腿</text>
   <text x="712" y="162" class="cell">12</text><text x="770" y="162" class="cell">AGILE 下身策略</text>
   <circle cx="626" cy="191" r="5" fill="#d39b2a"/><text x="638" y="196" class="cell">腰</text>
-  <text x="716" y="196" class="cell">3</text><text x="770" y="196" class="cell">AGILE 下身策略</text>
+  <text x="716" y="196" class="cell">3</text><text x="770" y="196" class="cell">无，目标固定为 0</text>
   <text x="770" y="212" class="sub">GR00T 也预测腰，但不执行</text>
   <circle cx="626" cy="239" r="5" fill="#3f7fd0"/><text x="638" y="244" class="cell">手臂</text>
   <text x="712" y="244" class="cell">14</text><text x="770" y="244" class="cell">GR00T，直接执行</text>
