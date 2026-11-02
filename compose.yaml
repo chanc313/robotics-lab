@@ -39,6 +39,7 @@ services:
       - ./ws/cppsrc:/workspace/cppsrc
       - ./ws/pythonsrc:/workspace/pythonsrc
       - ./ws/rossrc:/workspace/rossrc
+      - ./ws/recordings:/workspace/recordings
       - ./.devcontainer/ruff:/opt/ruff:ro
       - ./output/build:/build
       - ./output/storage:/data

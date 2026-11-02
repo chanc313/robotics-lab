@@ -11,7 +11,7 @@
 
 | 容器 | `/workspace` 下的内容 | 其他挂载 |
 |---|---|---|
-| dev | `docs/`、`src/ros/`、`cppsrc/`、`pythonsrc/`、`rossrc/`、`scripts/`（只读） | `/build`（构建产物）、`/data`、`/runs` |
+| dev | `docs/`、`src/ros/`、`cppsrc/`、`pythonsrc/`、`rossrc/`、`recordings/`、`scripts/`（只读） | `/build`（构建产物）、`/data`、`/runs` |
 | sim | `docs/`、`src/simulation/`、`experiments/` | `/data`、`/runs` |
 | policy | `docs/`、`src/ai/`、`experiments/` | `/data`、`/runs` |
 

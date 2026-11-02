@@ -30,6 +30,7 @@ ws/                              开发工作区
   src/ros/                       ROS 2 包与节点（dev）
   src/simulation/                Isaac 任务、环境与仿真适配（sim）
   experiments/                   实验组合配置（sim、policy）
+  recordings/                    挑选出来随仓库推送的录像（运行产物默认留在 output/）
   cppsrc/, pythonsrc/, rossrc/   C++ / Python / ROS 2 学习沙盒（dev）
 ```
 
