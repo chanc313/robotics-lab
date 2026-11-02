@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 960" width="1120" height="960" role="img" aria-labelledby="title desc">
+  <title id="title">预期架构：分层与模块化（设想）</title>
+  <desc id="desc">视觉层把原始数据交给低频语义大模型组成的决策层，把处理后的环境信息写入全局感知层。决策层输出宏观语义决策或新提案，安全审计层先判断是否合法，再分解成动作链并逐条检查，不合法时执行确定性安全动作或待机。合法动作链交给通信层，中央调度器用 Encoder 限定合法调用空间、用 MPC 在物理约束内求解，生成确定性 API 调用，求解失败时保持当前姿态。部件层由腿与稳定守护、腰、手臂、手、传感器等异构部件组成，各自有 MCU、执行器、API 能力表和确定性的控制回路与柔顺反射，手臂通过前馈预告负载与重心变化，部件经紧急通道向调度器上报意外，并把状态上报给全局感知层。全局感知层是公共资源，供审计层和通信层读取。底层是高频 MCU 与确定性电机执行器，运行 RTOS。</desc>
+  <defs>
+    <style>
+      text { font-family: "Noto Sans SC", "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", sans-serif; fill: #1f2328; }
+      .title { font-size: 14px; font-weight: 700; }
+      .body { font-size: 12.5px; fill: #2b3038; }
+      .small { font-size: 11.5px; fill: #5b6068; }
+      .band { font-size: 14px; font-weight: 700; }
+      .tag { font-size: 11px; fill: #6b7079; }
+      .lab { font-size: 11.5px; fill: #3d4450; }
+    </style>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#3d4450"/>
+    </marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0504d"/>
+    </marker>
+    <marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/>
+    </marker>
+    <marker id="ahn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5a9e78"/>
+    </marker>
+  </defs>
+
+  <!-- card -->
+  <rect x="0.5" y="0.5" width="1119" height="959" rx="16" fill="#fafaf7" stroke="#d9dbd3"/>
+  <text x="32" y="38" style="font-size:19px;font-weight:700">预期架构：分层与模块化（设想）</text>
+  <text x="32" y="60" class="small" style="font-size:12.5px">决策层只给语义决策；审计层判合法并分解；通信层用 MPC 生成合法的确定性 API；部件层自带确定性回路与反射</text>
+
+  <!-- vision -> perception (processed) -->
+  <path d="M205,96 L205,84 L955,84 L955,94" fill="none" stroke="#8a8f98" stroke-width="1.4" marker-end="url(#ahg)"/>
+  <text x="580" y="79" text-anchor="middle" class="lab">处理后的环境信息</text>
+
+  <!-- vision -->
+  <rect x="40" y="96" width="330" height="100" rx="10" fill="#fdf6e7" stroke="#d39b2a" stroke-width="1.5"/>
+  <text x="56" y="120" class="band" style="fill:#8a5f12">视觉层</text>
+  <text x="354" y="120" text-anchor="end" class="tag">相机 · 雷达 · 声纳 · 麦克风</text>
+  <text x="56" y="148" class="body">获取环境信息</text>
+  <text x="56" y="170" class="small">给决策层的冗余、提前输入；看不到时</text>
+  <text x="56" y="187" class="small">由部件层兜底</text>
+
+  <!-- decision -->
+  <rect x="410" y="96" width="350" height="100" rx="10" fill="#f4f0fa" stroke="#8a6fc0" stroke-width="1.5"/>
+  <text x="426" y="120" class="band" style="fill:#5b4a8a">决策层 · 低频语义大模型</text>
+  <text x="744" y="120" text-anchor="end" class="tag">GPU · 秒级</text>
+  <text x="426" y="148" class="body">输入：传感器原始数据、人类语言</text>
+  <text x="426" y="170" class="body">输出：宏观语义决策，可缓存为动作链</text>
+  <text x="426" y="187" class="small">随时可插入新提案，如"注意小孩，放慢"</text>
+
+  <line x1="370" y1="146" x2="408" y2="146" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+
+  <!-- decision -> audit -->
+  <line x1="585" y1="196" x2="585" y2="234" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="593" y="220" class="lab">宏观决策 / 新提案</text>
+
+  <!-- audit -->
+  <rect x="40" y="236" width="720" height="130" rx="10" fill="#fbefee" stroke="#c0504d" stroke-width="1.5"/>
+  <text x="56" y="260" class="band" style="fill:#8e3431">安全审计层 · AI + 确定性门阀</text>
+  <text x="744" y="260" text-anchor="end" class="tag">PREEMPT_RT Linux · ROS 2 · 秒级到百毫秒</text>
+  <rect x="60" y="274" width="200" height="60" rx="8" fill="#ffffff" stroke="#e3b4b2"/>
+  <text x="160" y="298" text-anchor="middle" class="title">① 判合法</text>
+  <text x="160" y="319" text-anchor="middle" class="small">硬编码守则 + 感知层数据</text>
+  <rect x="290" y="274" width="200" height="60" rx="8" fill="#ffffff" stroke="#e3b4b2"/>
+  <text x="390" y="298" text-anchor="middle" class="title">② 分解为动作链</text>
+  <text x="390" y="319" text-anchor="middle" class="small">转身、前进 X 米……</text>
+  <rect x="520" y="274" width="220" height="60" rx="8" fill="#ffffff" stroke="#e3b4b2"/>
+  <text x="630" y="298" text-anchor="middle" class="title">③ 逐条检查</text>
+  <text x="630" y="319" text-anchor="middle" class="small">插入的新提案同样先审</text>
+  <line x1="260" y1="304" x2="288" y2="304" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <line x1="490" y1="304" x2="518" y2="304" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="60" y="355" class="small" style="fill:#8e3431">不合法：执行确定性安全动作或待机</text>
+
+  <!-- audit -> comm -->
+  <line x1="400" y1="366" x2="400" y2="404" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="408" y="390" class="lab">合法动作链</text>
+
+  <!-- comm -->
+  <rect x="40" y="406" width="720" height="124" rx="10" fill="#eef4fb" stroke="#3f7fd0" stroke-width="1.5"/>
+  <text x="56" y="430" class="band" style="fill:#2b5d9e">通信层 · 中央调度器（微服务）</text>
+  <text x="744" y="430" text-anchor="end" class="tag">PREEMPT_RT Linux · ROS 2 · 数十毫秒</text>
+  <rect x="60" y="444" width="200" height="60" rx="8" fill="#ffffff" stroke="#b5cdea"/>
+  <text x="160" y="468" text-anchor="middle" class="title">Encoder</text>
+  <text x="160" y="489" text-anchor="middle" class="small">只生成合法的 API 调用</text>
+  <rect x="290" y="444" width="200" height="60" rx="8" fill="#ffffff" stroke="#b5cdea"/>
+  <text x="390" y="468" text-anchor="middle" class="title">MPC 预测</text>
+  <text x="390" y="489" text-anchor="middle" class="small">在物理约束内求解，选最优</text>
+  <rect x="520" y="444" width="220" height="60" rx="8" fill="#ffffff" stroke="#b5cdea"/>
+  <text x="630" y="468" text-anchor="middle" class="title">确定性 API 调用</text>
+  <text x="630" y="489" text-anchor="middle" class="small">求解失败：保持当前姿态</text>
+  <line x1="260" y1="474" x2="288" y2="474" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <line x1="490" y1="474" x2="518" y2="474" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="60" y="522" class="small">突发时可快速下令、发布全身新预案；平时基本空闲</text>
+
+  <!-- comm -> components -->
+  <line x1="400" y1="530" x2="400" y2="568" stroke="#3d4450" stroke-width="1.4" marker-end="url(#ah)"/>
+  <text x="408" y="554" class="lab">API 调用</text>
+
+  <!-- components -->
+  <rect x="40" y="570" width="720" height="196" rx="10" fill="#f4f9f6" stroke="#5a9e78" stroke-width="1.5"/>
+  <text x="56" y="594" class="band" style="fill:#2f6b4a">部件层 · 异构部件，各自一个 ROS 节点</text>
+  <text x="744" y="594" text-anchor="end" class="tag">毫秒级</text>
+  <g>
+    <rect x="60" y="610" width="125" height="72" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+    <text x="122" y="634" text-anchor="middle" class="title">腿 · 稳定守护</text>
+    <text x="122" y="654" text-anchor="middle" class="small">任何时刻维持平衡</text>
+    <text x="122" y="671" text-anchor="middle" class="small">不问扰动来源</text>
+    <rect x="200" y="610" width="125" height="72" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+    <text x="262" y="634" text-anchor="middle" class="title">腰</text>
+    <text x="262" y="654" text-anchor="middle" class="small">自有控制回路</text>
+    <rect x="340" y="610" width="125" height="72" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+    <text x="402" y="634" text-anchor="middle" class="title">手臂</text>
+    <text x="402" y="654" text-anchor="middle" class="small">自有控制回路</text>
+    <rect x="480" y="610" width="125" height="72" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+    <text x="542" y="634" text-anchor="middle" class="title">手</text>
+    <text x="542" y="654" text-anchor="middle" class="small">自有控制回路</text>
+    <rect x="620" y="610" width="125" height="72" rx="8" fill="#ffffff" stroke="#a9cdb8"/>
+    <text x="682" y="634" text-anchor="middle" class="title">传感器</text>
+    <text x="682" y="654" text-anchor="middle" class="small">相机、IMU……</text>
+  </g>
+  <path d="M402,682 L402,698 L122,698 L122,684" fill="none" stroke="#5a9e78" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahn)"/>
+  <text x="262" y="716" text-anchor="middle" class="lab" style="fill:#2f6b4a">前馈：手臂预告负载与重心变化，稳定守护提前补偿</text>
+  <text x="56" y="740" class="small">每个部件：MCU + 执行器 + API 能力表；自己负责控制回路，柔顺控制等确定性反射处理意外接触，</text>
+  <text x="56" y="757" class="small">状态自动上报。部件之间的物理冲突在开发期由开发者解决。</text>
+
+  <!-- emergency channel -->
+  <path d="M760,650 L792,650 L792,470 L762,470" fill="none" stroke="#c0504d" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#ahr)"/>
+  <text x="806" y="560" text-anchor="middle" class="lab" style="fill:#8e3431" transform="rotate(-90 806 560)">紧急上报</text>
+
+  <!-- hardware band -->
+  <rect x="40" y="790" width="720" height="44" rx="8" fill="#e9eaee" stroke="#b9bdc6"/>
+  <text x="400" y="817" text-anchor="middle" class="body" style="font-weight:600">底层：高频 MCU + 确定性电机执行器 · 纯 RTOS</text>
+  <line x1="400" y1="766" x2="400" y2="788" stroke="#3d4450" stroke-width="1.2"/>
+
+  <!-- perception -->
+  <rect x="830" y="96" width="258" height="670" rx="10" fill="#f3f4f6" stroke="#8a8f98" stroke-width="1.5"/>
+  <text x="846" y="120" class="band" style="fill:#4a4f58">全局感知层</text>
+  <text x="846" y="140" class="tag">机器人的公共资源</text>
+  <text x="846" y="176" class="body">状态机与固定属性 handler</text>
+  <text x="846" y="204" class="body">机器人自身的全部细节</text>
+  <text x="846" y="232" class="body">环境信息与对环境的判断</text>
+  <text x="846" y="272" class="small">来源：部件向上同步，</text>
+  <text x="846" y="290" class="small">调度器计算的整体信息，</text>
+  <text x="846" y="308" class="small">视觉层处理后的环境信息</text>
+  <text x="846" y="344" class="small">对所有部件按需公开，</text>
+  <text x="846" y="362" class="small">按算法授予修改权限</text>
+
+  <!-- perception reads / writes -->
+  <line x1="828" y1="300" x2="762" y2="300" stroke="#8a8f98" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ahg)"/>
+  <text x="812" y="292" text-anchor="end" class="tag">读取</text>
+  <line x1="828" y1="430" x2="762" y2="430" stroke="#8a8f98" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#ahg)"/>
+  <text x="812" y="422" text-anchor="end" class="tag">读写</text>
+  <line x1="760" y1="720" x2="828" y2="720" stroke="#8a8f98" stroke-width="1.4" marker-end="url(#ahg)"/>
+  <text x="794" y="712" text-anchor="middle" class="tag">状态上报</text>
+
+  <!-- legend: two lines of safety -->
+  <text x="32" y="868" class="title">两道独立的安全防线</text>
+  <text x="32" y="892" class="small">· 视觉提前发现（例如幼儿）→ 决策层提出放慢 → 审计层先审再调整动作链：冗余、提前，依赖感知。</text>
+  <text x="32" y="914" class="small">· 部件层的确定性反射（柔顺控制、碰撞检测）：即使视觉漏检也兜底，并经红色虚线通道上报；前提是在不确定区域限制速度与能量。</text>
+  <text x="32" y="938" class="small">· 合法性的保证：审计层查"该不该做"，通信层的 Encoder 与 MPC 约束保证"调用合法、物理上做得到"。</text>
+</svg>
