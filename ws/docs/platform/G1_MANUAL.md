@@ -11,7 +11,7 @@
 基线由三层现成部件拼成，都来自 NVIDIA，可以直接运行：
 
 - **上层：GR00T N1.6 视觉-语言-动作模型。** 已在这个任务上微调好。它看头部相机的一帧画面、读上身关节角、接收一句英文指令，每秒给出接下来 1 秒的上身动作和行走指令（往哪走、走多快、身体多高）。
-- **下层：全身控制器。** 手臂和手直接跟随 GR00T 给的目标；腿交给 AGILE，一个已训练好的强化学习行走策略，它按行走指令迈步并保持平衡。
+- **下层：全身控制器。** 手臂和手直接跟随 GR00T 给的目标；腿和腰交给 HOMIE v2，一个已训练好的强化学习下身策略，它按行走指令迈步并保持平衡。
 - **仿真：Isaac Sim。** 模拟 Unitree G1（43 个自由度，带三指手）和仓库场景，并判定任务是否完成：从货架取下棕色盒子，放进右侧桌上的蓝色箱子，限时 30 秒。
 
 GR00T 运行在 policy 容器，控制器与仿真运行在 sim 容器，两者经本机端口通信。上层慢（1 Hz）、下层快（50 Hz）、物理更快（200 Hz），这是整个基线的核心分工。
@@ -58,7 +58,7 @@ RTX 4080 Laptop 12 GB、30 GB 内存，官方权重，无界面：
 
 1. **推理时仿真暂停。** 等效于推理零延迟；真机上推理期间机器人仍在运动，所以这里的成功率不能直接推到部署。
 2. **动作整块开环执行。** 每块 1 秒内不看新的观测，块与块之间没有平滑。
-3. **腰被锁定。** 取放全靠手臂和行走，模型给出的腰部目标没有用上。
+3. **腰不归 GR00T 管。** 腰由下身策略为保持平衡而调整，GR00T 给出的腰部目标被丢弃，躯干朝向指令恒为 0，取放全靠手臂和行走。
 4. **感知很窄。** 只用当前一帧头部 RGB，没有深度、历史帧和腕部相机。
 5. **结果不可完全复现。** 固定种子只固定仿真一侧，GR00T 采样的噪声没有固定，同样的设置两次运行结果可以不同。
 6. **评估很贵。** 单个 episode 墙钟数分钟，少量 episode 的成功率置信区间很宽；比较两个方案前要先定好每组的样本量。
@@ -89,7 +89,7 @@ RTX 4080 Laptop 12 GB、30 GB 内存，官方权重，无界面：
 | 请求内容 | 图像缩放填充；状态为左右臂各 7、左右手各 7、腰 3，共 31 维；指令文本 | `isaaclab_arena_gr00t/policy/gr00t_core.py`（`build_gr00t_policy_observations`） |
 | 推理 | 同步 ZMQ 请求-应答；Eagle 2B 视觉语言骨干 + DiT 动作头，4 步 flow matching 去噪；输出 50 步 × 35 维（31 个关节 + 行走 vx、vy、ωz + 身高） | `isaaclab_arena_gr00t/policy/gr00t_remote_closedloop_policy.py:198`；权重 `config.json` |
 | 映射到仿真动作 | 35 维改排为 50 维：43 个关节位置 + 行走 3 + 身高 1 + 躯干姿态 3（GR00T 不输出，填 0） | `gr00t_core.py:335` |
-| 全身控制 | 手臂与手 28 个关节直接作位置目标；AGILE（带 LSTM 的 ONNX 学生策略）读 29 个身体关节状态，输出 12 个腿关节目标；腰 3 个关节固定为 0（`enable_waist=False`） | `isaaclab_arena_g1/g1_env/mdp/actions/g1_decoupled_wbc_joint_action.py:185`；`isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/policy/g1_agile_policy.py:146`；同目录 `config/configs.py:95` |
+| 全身控制 | 手臂与手 28 个关节直接作位置目标；行走指令、身高与躯干朝向（恒为 0）交给下身策略 HOMIE v2，输出 12 个腿关节和 3 个腰关节的目标（`enable_waist=False` 时腰归下身组）；`g1_wbc_joint` 的 `wbc_version` 默认为 `homie_v2` | `isaaclab_arena_g1/g1_env/mdp/actions/g1_decoupled_wbc_joint_action.py:185`；同目录 `g1_decoupled_wbc_joint_action_cfg.py:22`；`isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/policy/g1_homie_policy.py` |
 | 物理 | 每个控制步 4 个 PhysX 步（`dt=0.005`、`decimation=4`），关节 PD 驱动 | 环境配置 |
 | 判定 | 依次满足：物体落稳 → 盒子抬过一定高度 → 盒子稳定落在箱子里；盒子掉落提前终止；1500 步（30 秒）超时 | `isaaclab_arena/tasks/pick_and_place_task.py`；`isaaclab_arena_environments/galileo_g1_locomanip_pick_and_place_environment.py:169` |
 | 资产下载 | 远程 USD 镜像到 `tempfile.gettempdir()`；sim 容器的 `TMPDIR` 指向 `/data/assets/downloads` | `submodules/IsaacLab/source/isaaclab/isaaclab/utils/assets.py`（`retrieve_file_path`） |
@@ -107,4 +107,5 @@ RTX 4080 Laptop 12 GB、30 GB 内存，官方权重，无界面：
 | 推理 | 从高斯噪声出发，欧拉积分 4 步（`num_inference_timesteps=4`）；噪声未设种子 | 同上，`get_action_with_features` |
 | 微调设置 | 语言模型冻结但放开最后 4 层（`tune_top_llm_layers=4`）；视觉编码器、连接器、动作头、embodiment 插头全部训练；8 GPU、全局 batch 96、学习率 1e-4、2 万步 | 权重 `experiment_cfg/conf.yaml` |
 | 微调数据 | VR 遥操作示范 → Isaac Lab Mimic 扩增（上游教程 `--generation_num_trials 100`；发布权重所用条数未在权重文件中注明）→ LeRobot 格式；Hugging Face 数据集 `nvidia/Arena-G1-Loco-Manipulation-Task` | Arena 文档 `docs/pages/example_workflows/locomanipulation/` |
-| AGILE | WBC-AGILE 的速度-身高学生策略（`unitree_g1_velocity_height_recurrent_student.onnx`，固定提交 `7259792`）；指令 `[vx, vy, ωz, h]`，默认身高 0.72 m | `isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/config/g1_agile.yaml` |
+| HOMIE v2（实际使用） | `stand.onnx` 与 `walk.onnx` 两个网络，速度指令范数小于 0.05 时用站立网络；单帧观测 86 维：速度指令（缩放 2、2、0.5）、身高、躯干横滚/俯仰/偏航指令、角速度、重力方向、29 个关节角与角速度、上一步输出，叠 6 帧共 516 维；输出 15 维（12 腿 + 3 腰），乘 0.25 后加默认角；默认身高 0.74 m；运行日志可见加载 `homie_v2/stand.onnx`、`walk.onnx` | `isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/config/g1_homie_v2.yaml`；`policy/g1_homie_policy.py` |
+| AGILE（备选，未使用） | WBC-AGILE 的速度-身高学生策略（`unitree_g1_velocity_height_recurrent_student.onnx`，固定提交 `7259792`），带 LSTM；只输出 12 个腿关节，腰固定为 0；指令 `[vx, vy, ωz, h]`，默认身高 0.72 m；用 `--embodiment g1_wbc_agile_joint` 启用 | `isaaclab_arena_g1/g1_whole_body_controller/wbc_policy/config/g1_agile.yaml` |

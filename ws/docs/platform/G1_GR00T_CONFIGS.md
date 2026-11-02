@@ -94,6 +94,6 @@ YAML 没写的字段用默认值，例如图像尺寸 480×640、种子 10。
 | 46 | `base_height_command` | GR00T |
 | 47–49 | 躯干姿态（横滚、俯仰、偏航） | GR00T 不输出，固定填 0 |
 
-这 50 维交给 WBC 动作项 `g1_decoupled_wbc_joint_action.py`：上身关节目标直接做位置控制，行走速度和高度交给 AGILE 下身策略生成腿部动作。按代码，G1 当前使用的 AGILE 配置 `enable_waist=False`，腰被划在下身组里，所以 GR00T 预测的 3 个腰部目标实际不会被执行，腰由下身策略控制。
+这 50 维交给 WBC 动作项 `g1_decoupled_wbc_joint_action.py`：上身关节目标直接做位置控制，行走速度和高度交给下身策略 HOMIE v2 生成腿和腰的动作。按代码，`g1_wbc_joint` 使用 HOMIE v2，配置 `enable_waist=False`，腰被划在下身组里，所以 GR00T 预测的 3 个腰部目标实际不会被执行，腰由下身策略控制。
 
 执行由 `ActionChunkScheduler` 负责：缓存一块 50×50 的动作，每个 `env.step()` 取一行；50 行取完后再向服务端请求下一块。

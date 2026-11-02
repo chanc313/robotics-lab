@@ -158,6 +158,8 @@ case "$command" in
         prepare
         source ws/experiments/arena_g1/experiment.env
         gui_compose
+        # Extra arguments are runner options (e.g. --record_camera_video, --num_episodes 3), so they
+        # go before the task name; options after it are parsed by the task's own subparser.
         # Only this upstream integration uses the GR00T client source in Python 3.12.
         # The complete GR00T model package is installed exclusively in policy (3.10).
         exec "${compose[@]}" run --rm --no-deps sim \
@@ -168,7 +170,7 @@ case "$command" in
             --policy_config_yaml_path "$G1_POLICY_CONFIG" \
             --remote_host 127.0.0.1 --remote_port "${POLICY_PORT:-5555}" \
             --num_episodes 1 --output_base_dir /runs/arena-g1/evaluation \
-            "$G1_TASK" --object brown_box --embodiment "$G1_EMBODIMENT" "$@"
+            "$@" "$G1_TASK" --object brown_box --embodiment "$G1_EMBODIMENT"
         ;;
     help)
         cat <<'HELP'
@@ -193,7 +195,7 @@ Run from the Linux host terminal in this repository:
   scripts/lab policy-train     GR00T finetuning (help unless arguments are supplied)
   scripts/lab policy-server    Serve the downloaded G1 checkpoint on loopback:5555
   scripts/lab policy-ping      Check the GR00T endpoint with a finite timeout
-  scripts/lab g1-evaluate      Evaluate G1 against the already running policy service
+  scripts/lab g1-evaluate [opts] Evaluate G1 against the running policy service, e.g. --record_camera_video
 HELP
         ;;
     *) echo "Unknown command: $command. Run scripts/lab help." >&2; exit 2 ;;
