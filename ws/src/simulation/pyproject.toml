@@ -1,0 +1,11 @@
+[project]
+name = "robotics-lab-sim"
+version = "0.1.0"
+description = "Project simulation code for the sim container (Isaac Sim / Lab / Arena)."
+requires-python = "==3.12.*"
+# Isaac Sim, Isaac Lab and Arena come from the pinned Arena environment in the sim image
+# (/opt/arena/.venv); this module adds no dependencies of its own.
+dependencies = []
+
+[tool.setuptools]
+packages = ["robotics_lab_sim"]

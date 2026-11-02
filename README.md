@@ -60,6 +60,7 @@ ws/                              开发工作区
 ./scripts/lab train           # Isaac Lab 强化学习训练（默认短 Cartpole）
 ./scripts/lab policy-server   # GR00T G1 推理服务
 ./scripts/lab g1-evaluate     # G1 闭环评估，连接已运行的推理服务
+./scripts/lab g1-record       # 无界面录一集：头部相机与第三人称相机左右并排
 ```
 
 这些入口提供启动方式，不代表对应流程都已验证；当前进度见 [项目计划](ws/docs/PROJECT_PLAN.md)。

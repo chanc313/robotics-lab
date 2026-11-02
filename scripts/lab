@@ -172,6 +172,36 @@ case "$command" in
             --num_episodes 1 --output_base_dir /runs/arena-g1/evaluation \
             "$@" "$G1_TASK" --object brown_box --embodiment "$G1_EMBODIMENT"
         ;;
+    g1-record)
+        prepare
+        source ws/experiments/arena_g1/experiment.env
+        # Headless run that records the head camera and a fixed third-person camera frame by
+        # frame in simulation time, then places each episode's two videos side by side.
+        # Project modules under ws/src/simulation are imported through PYTHONPATH.
+        out=arena-g1/recordings
+        "${compose[@]}" run --rm --no-deps sim \
+            env PYTHONPATH=/opt/arena/submodules/Isaac-GR00T:/workspace/src/simulation \
+            python isaaclab_arena/evaluation/policy_runner.py \
+            --headless --device cpu --enable_cameras --record_camera_video \
+            --policy_type isaaclab_arena_gr00t.policy.gr00t_remote_closedloop_policy.Gr00tRemoteClosedloopPolicy \
+            --policy_config_yaml_path "$G1_POLICY_CONFIG" \
+            --remote_host 127.0.0.1 --remote_port "${POLICY_PORT:-5555}" \
+            --num_episodes 1 --output_base_dir "/runs/$out" \
+            --external_environment_class_path "$G1_RECORDING_ENV" \
+            "$@" "$G1_RECORDING_TASK" --object brown_box --embodiment "$G1_RECORDING_EMBODIMENT"
+        run_dir=$(ls -td "output/runs/$out"/*/ | head -1)
+        exec "${compose[@]}" run --rm --no-deps sim bash -c '
+            cd "/runs/$1" || exit 1
+            for head in *robot_head_cam_rgb-episode-*.mp4; do
+                [[ -e "$head" ]] || { echo "No recorded episode in /runs/$1" >&2; exit 1; }
+                third=${head/robot_head_cam_rgb/third_person_cam_rgb}
+                both=side-by-side-episode-${head##*-episode-}
+                ffmpeg -loglevel error -y -i "$third" -i "$head" \
+                    -filter_complex "[1:v]scale=-2:720[h];[0:v][h]hstack" \
+                    -c:v libx264 -crf 20 -pix_fmt yuv420p "$both"
+                echo "Wrote /runs/$1$both"
+            done' _ "${run_dir#output/runs/}"
+        ;;
     help)
         cat <<'HELP'
 Run from the Linux host terminal in this repository:
@@ -196,6 +226,7 @@ Run from the Linux host terminal in this repository:
   scripts/lab policy-server    Serve the downloaded G1 checkpoint on loopback:5555
   scripts/lab policy-ping      Check the GR00T endpoint with a finite timeout
   scripts/lab g1-evaluate [opts] Evaluate G1 against the running policy service, e.g. --record_camera_video
+  scripts/lab g1-record [opts]   Record one G1 episode headless: head and third-person cameras side by side
 HELP
         ;;
     *) echo "Unknown command: $command. Run scripts/lab help." >&2; exit 2 ;;

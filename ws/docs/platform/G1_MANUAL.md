@@ -37,7 +37,7 @@ source ws/experiments/arena_g1/experiment.env
   "$G1_TASK" --object brown_box --embodiment "$G1_EMBODIMENT"
 ```
 
-加 `--record_camera_video` 会把头部相机画面逐帧写成 mp4，不占额外内存。结果在主机的 `output/runs/arena-g1/evaluation/<时间>/`：`episode_results_rank0.jsonl` 每行一个 episode，`index.html` 是汇总报告。
+加 `--record_camera_video` 会把头部相机画面逐帧写成 mp4，不占额外内存。要同时看到机器人本身，运行 `./scripts/lab g1-record`：它以无界面方式跑一集，按仿真时间逐帧录下头部相机和一个固定的第三人称相机，再合成左右并排的视频，结果在 `output/runs/arena-g1/recordings/<时间>/`（相机由项目代码 `ws/src/simulation/robotics_lab_sim/g1_recording.py` 加入，场景与策略不变）。结果在主机的 `output/runs/arena-g1/evaluation/<时间>/`：`episode_results_rank0.jsonl` 每行一个 episode，`index.html` 是汇总报告。
 
 场景资产第一次运行时从 NVIDIA 资产库下载，缓存在 `output/storage/assets/downloads/`，之后的运行直接复用。
 

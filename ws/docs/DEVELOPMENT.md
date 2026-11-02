@@ -49,7 +49,7 @@
 | `dev`（ROS） | apt 包写在 `docker/Dockerfile.dev`，ROS 包的系统依赖同时写进各包的 `package.xml` | 系统 Python `/usr/bin/python3` |
 | `dev`（学习沙盒） | `ws/pythonsrc/pyproject.toml` 与 `uv.lock` | `/opt/learning-venv` |
 
-自有模块的源码在运行时绑定挂载，不安装进环境。需要让某个环境导入 `src/` 下的 Python 模块时，在对应 Dockerfile 中向该环境写入一个指向 `/workspace/src/<模块>` 的 `.pth` 文件（`dev` 的学习沙盒就是这样接入 `/workspace/pythonsrc` 的）；源码修改即时生效，依赖变化才需要重建。
+自有模块的源码在运行时绑定挂载，不安装进环境。需要让某个环境导入 `src/` 下的 Python 模块时，在对应 Dockerfile 中向该环境写入一个指向 `/workspace/src/<模块>` 的 `.pth` 文件（`dev` 的学习沙盒就是这样接入 `/workspace/pythonsrc` 的）；源码修改即时生效，依赖变化才需要重建。`sim` 镜像下次重建前暂用另一种方式：`scripts/lab` 在运行命令里设置 `PYTHONPATH=/workspace/src/simulation`。
 
 上游版本统一在 `docker/versions.env` 修改（Arena / Isaac Lab / GR00T 提交、Arena 锁的 SHA-256、两个 Python 版本），共享基础镜像的摘要在 `compose.yaml` 的 `x-build-args` 修改。升级后复核子模块与锁文件，并重新执行 `uv pip check --python /opt/arena/.venv/bin/python`：`sim` 当前有两项已知的上游元数据差异（coverage、websockets，见 [迁移记录](archive/CONTAINER_MIGRATION_2026-10-11.md)），新出现的差异不能忽略。`sim` 安装后移除了当前不用的 `openpi-client`、`simready-search`，未来启用这些路线需要先处理依赖。
 
